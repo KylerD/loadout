@@ -23,30 +23,14 @@ export const posthogIntegration: Integration = {
     },
   ],
   setup: async (projectPath: string) => {
-    // Create providers.tsx
-    await fs.writeFile(
-      path.join(projectPath, 'app/providers.tsx'),
-      posthogTemplates.posthogProvider
-    );
+    // instrumentation-client.ts is generated centrally in cli.ts
+    // to handle merging with other integrations (e.g., Sentry)
 
-    // Create analytics service
+    // Create analytics service with helper functions
     await fs.mkdir(path.join(projectPath, 'services'), { recursive: true });
     await fs.writeFile(
       path.join(projectPath, 'services/analytics.service.ts'),
       posthogTemplates.analyticsService
     );
-
-    // Create analytics components
-    await fs.mkdir(path.join(projectPath, 'components'), { recursive: true });
-    await fs.writeFile(
-      path.join(projectPath, 'components/analytics.tsx'),
-      posthogTemplates.analyticsComponents
-    );
-
-    // Update layout.tsx to include provider
-    const layoutPath = path.join(projectPath, 'app/layout.tsx');
-    const layoutContent = await fs.readFile(layoutPath, 'utf-8');
-    const updatedLayout = posthogTemplates.wrapLayout(layoutContent);
-    await fs.writeFile(layoutPath, updatedLayout);
   },
 };

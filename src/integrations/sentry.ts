@@ -32,11 +32,10 @@ export const sentryIntegration: Integration = {
     },
   ],
   setup: async (projectPath: string) => {
-    // Create Sentry config files at root
-    await fs.writeFile(
-      path.join(projectPath, 'sentry.client.config.ts'),
-      sentryTemplates.clientConfig
-    );
+    // instrumentation.ts and instrumentation-client.ts are generated centrally
+    // in cli.ts to handle merging with other integrations (e.g., PostHog)
+
+    // Create server and edge config files (imported by instrumentation.ts)
     await fs.writeFile(
       path.join(projectPath, 'sentry.server.config.ts'),
       sentryTemplates.serverConfig

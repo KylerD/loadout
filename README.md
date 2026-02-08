@@ -118,12 +118,12 @@ Each integration generates a service and supporting files:
 - `app/api/stripe/portal/route.ts` - Customer portal
 
 ### PostHog
-- `app/providers.tsx` - PostHogProvider
+- `instrumentation-client.ts` - Lightweight init (Next.js 15.3+)
 - `services/analytics.service.ts` - Analytics helpers and hooks
-- `components/analytics.tsx` - TrackClick component
 
 ### Sentry
-- `sentry.client.config.ts` - Client-side config
+- `instrumentation.ts` - Server/edge registration (Next.js 15+)
+- `instrumentation-client.ts` - Client-side init (Next.js 15.3+)
 - `sentry.server.config.ts` - Server-side config
 - `sentry.edge.config.ts` - Edge config
 - `services/error.service.ts` - Error capture helpers

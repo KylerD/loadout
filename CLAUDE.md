@@ -58,10 +58,12 @@ Generated projects use Next.js default structure (no `--src-dir` flag).
 
 ### Modern Best Practices
 - **Next.js 16+**: Uses `proxy.ts` not `middleware.ts`
+- **Next.js 15.3+**: Uses `instrumentation-client.ts` for client-side init (PostHog, Sentry)
 - **Clerk**: Uses SignInButton/SignUpButton (modal mode), not custom pages
 - **Zod**: Uses v4 syntax (`z.email()` not `z.string().email()`)
 - **AI SDK**: Focuses on `generateObject` with Zod, not chat
-- **Sentry**: PII scrubbing via `beforeSend`, `sendDefaultPii: false`
+- **Sentry**: Uses `instrumentation.ts` + `onRequestError` for server capture
+- **PostHog**: Lightweight init via `instrumentation-client.ts`, no provider wrapper
 - **API Routes**: Only for actual external APIs, not internal operations
 
 ## Available Integrations
@@ -76,8 +78,8 @@ Generated projects use Next.js default structure (no `--src-dir` flag).
 | `inngest` | Background Jobs | `lib/inngest.client.ts`, `services/jobs.service.ts` |
 | `uploadthing` | File Uploads | `lib/uploadthing.client.ts`, `services/file.service.ts` |
 | `stripe` | Payments | `services/payment.service.ts`, webhook routes |
-| `posthog` | Analytics | `app/providers.tsx`, `services/analytics.service.ts` |
-| `sentry` | Error Tracking | `sentry.*.config.ts`, `services/error.service.ts` |
+| `posthog` | Analytics | `instrumentation-client.ts`, `services/analytics.service.ts` |
+| `sentry` | Error Tracking | `instrumentation.ts`, `instrumentation-client.ts`, `sentry.*.config.ts` |
 
 ## Adding New Integrations
 

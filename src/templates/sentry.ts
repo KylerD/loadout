@@ -1,5 +1,23 @@
 export const sentryTemplates = {
-  clientConfig: `import * as Sentry from '@sentry/nextjs';
+  // instrumentation.ts - registers Sentry for server/edge (Next.js 15+)
+  instrumentation: `import * as Sentry from '@sentry/nextjs';
+
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./sentry.server.config');
+  }
+
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    await import('./sentry.edge.config');
+  }
+}
+
+// Capture errors from Server Components, middleware, and proxies
+export const onRequestError = Sentry.captureRequestError;
+`,
+
+  // instrumentation-client.ts - client-side Sentry init (Next.js 15.3+)
+  instrumentationClient: `import * as Sentry from '@sentry/nextjs';
 import { SENTRY_DSN } from '@/lib/config';
 
 Sentry.init({
@@ -19,31 +37,24 @@ Sentry.init({
   ],
 
   beforeSend(event) {
-    // Don't send events in development
-    if (process.env.NODE_ENV === 'development') {
-      return null;
-    }
+    if (process.env.NODE_ENV === 'development') return null;
 
-    // Scrub PII from user data
+    // Scrub PII
     if (event.user) {
       delete event.user.email;
       delete event.user.ip_address;
       delete event.user.username;
     }
-
-    // Scrub sensitive headers
     if (event.request?.headers) {
       delete event.request.headers['authorization'];
-      delete event.request.headers['Authorization'];
       delete event.request.headers['cookie'];
-      delete event.request.headers['Cookie'];
-      delete event.request.headers['x-api-key'];
-      delete event.request.headers['X-API-Key'];
     }
-
     return event;
   },
 });
+
+// Instrument router navigations for performance
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 `,
 
   serverConfig: `import * as Sentry from '@sentry/nextjs';
@@ -57,28 +68,17 @@ Sentry.init({
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 0,
 
   beforeSend(event) {
-    // Don't send events in development
-    if (process.env.NODE_ENV === 'development') {
-      return null;
-    }
+    if (process.env.NODE_ENV === 'development') return null;
 
-    // Scrub PII from user data
     if (event.user) {
       delete event.user.email;
       delete event.user.ip_address;
       delete event.user.username;
     }
-
-    // Scrub sensitive headers
     if (event.request?.headers) {
       delete event.request.headers['authorization'];
-      delete event.request.headers['Authorization'];
       delete event.request.headers['cookie'];
-      delete event.request.headers['Cookie'];
-      delete event.request.headers['x-api-key'];
-      delete event.request.headers['X-API-Key'];
     }
-
     return event;
   },
 });
@@ -95,28 +95,17 @@ Sentry.init({
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 0,
 
   beforeSend(event) {
-    // Don't send events in development
-    if (process.env.NODE_ENV === 'development') {
-      return null;
-    }
+    if (process.env.NODE_ENV === 'development') return null;
 
-    // Scrub PII from user data
     if (event.user) {
       delete event.user.email;
       delete event.user.ip_address;
       delete event.user.username;
     }
-
-    // Scrub sensitive headers
     if (event.request?.headers) {
       delete event.request.headers['authorization'];
-      delete event.request.headers['Authorization'];
       delete event.request.headers['cookie'];
-      delete event.request.headers['Cookie'];
-      delete event.request.headers['x-api-key'];
-      delete event.request.headers['X-API-Key'];
     }
-
     return event;
   },
 });
@@ -159,19 +148,10 @@ export default function GlobalError({
   errorService: `import * as Sentry from '@sentry/nextjs';
 
 export class ErrorService {
-  /**
-   * Capture an exception with optional context
-   * Note: PII is automatically scrubbed by Sentry config
-   */
   captureException(error: Error, context?: Record<string, unknown>) {
-    Sentry.captureException(error, {
-      extra: context,
-    });
+    Sentry.captureException(error, { extra: context });
   }
 
-  /**
-   * Capture a message with severity level
-   */
   captureMessage(
     message: string,
     level: 'fatal' | 'error' | 'warning' | 'log' | 'info' | 'debug' = 'info'
@@ -179,17 +159,10 @@ export class ErrorService {
     Sentry.captureMessage(message, level);
   }
 
-  /**
-   * Set the current user context (only non-PII fields)
-   * Email and IP are automatically scrubbed
-   */
   setUser(user: { id: string } | null) {
     Sentry.setUser(user);
   }
 
-  /**
-   * Add a breadcrumb for debugging
-   */
   addBreadcrumb(breadcrumb: {
     message: string;
     category?: string;
@@ -198,23 +171,8 @@ export class ErrorService {
   }) {
     Sentry.addBreadcrumb(breadcrumb);
   }
-
-  /**
-   * Set extra context data
-   */
-  setExtra(key: string, value: unknown) {
-    Sentry.setExtra(key, value);
-  }
-
-  /**
-   * Set tag for filtering
-   */
-  setTag(key: string, value: string) {
-    Sentry.setTag(key, value);
-  }
 }
 
-// Export singleton instance
 export const errorService = new ErrorService();
 `,
 
@@ -232,7 +190,6 @@ export default withSentryConfig(nextConfig, {
   tunnelRoute: '/monitoring',
   hideSourceMaps: true,
   disableLogger: true,
-  automaticVercelMonitors: true,
 });
 `,
 };

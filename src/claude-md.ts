@@ -127,6 +127,16 @@ export async function generateClaudeMd(
     content += `│   └── emails/       # React Email templates\n`;
   }
 
+  const hasPostHog = config.integrations.includes('posthog');
+  const hasSentry = config.integrations.includes('sentry');
+
+  if (hasPostHog || hasSentry) {
+    content += `├── instrumentation-client.ts  # Client-side init (analytics/errors)\n`;
+  }
+  if (hasSentry) {
+    content += `├── instrumentation.ts         # Server-side Sentry registration\n`;
+  }
+
   content += `├── lib/              # Configuration and service clients
 │   ├── config.ts     # Centralized environment variables
 │   └── *.client.ts   # Provider client configurations

@@ -8,6 +8,10 @@ import { generateClaudeMd } from './claude-md.js';
 import { generateEnvFiles } from './env.js';
 import { generateConfig } from './config.js';
 import { generateReadme, generateGitignore } from './generate-readme.js';
+import {
+  generateInstrumentationClient,
+  generateInstrumentation,
+} from './instrumentation.js';
 import type { ProjectConfig } from './types.js';
 
 export async function main() {
@@ -44,6 +48,10 @@ export async function main() {
       await installIntegrations(projectPath, config);
       spinner.succeed('Integrations configured');
     }
+
+    // Generate instrumentation files (for PostHog, Sentry, etc.)
+    await generateInstrumentationClient(projectPath, config);
+    await generateInstrumentation(projectPath, config);
 
     // Generate config and environment files
     spinner.start('Generating config and environment files...');
