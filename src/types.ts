@@ -27,9 +27,12 @@ export interface EnvVar {
   isPublic?: boolean;
 }
 
+export type AIProviderChoice = 'openai' | 'anthropic' | 'google';
+
 export interface ProjectConfig {
   name: string;
   integrations: IntegrationId[];
+  aiProvider?: AIProviderChoice;
 }
 
 export interface TemplateFile {

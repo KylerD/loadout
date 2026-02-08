@@ -1,9 +1,9 @@
 import { execa } from 'execa';
-import type { Integration, IntegrationId, EnvVar } from '../types.js';
+import type { Integration, IntegrationId, EnvVar, ProjectConfig } from '../types.js';
 
 import { clerkIntegration } from './clerk.js';
 import { neonDrizzleIntegration } from './neon-drizzle.js';
-import { aiSdkIntegration } from './ai-sdk.js';
+import { createAiSdkIntegration } from './ai-sdk.js';
 import { resendIntegration } from './resend.js';
 import { firecrawlIntegration } from './firecrawl.js';
 import { inngestIntegration } from './inngest.js';
@@ -12,10 +12,10 @@ import { stripeIntegration } from './stripe.js';
 import { posthogIntegration } from './posthog.js';
 import { sentryIntegration } from './sentry.js';
 
-export const integrations: Record<IntegrationId, Integration> = {
+// Static integrations (don't need config)
+const staticIntegrations: Partial<Record<IntegrationId, Integration>> = {
   clerk: clerkIntegration,
   'neon-drizzle': neonDrizzleIntegration,
-  'ai-sdk': aiSdkIntegration,
   resend: resendIntegration,
   firecrawl: firecrawlIntegration,
   inngest: inngestIntegration,
@@ -25,16 +25,24 @@ export const integrations: Record<IntegrationId, Integration> = {
   sentry: sentryIntegration,
 };
 
+// Get integration, with dynamic ones using config
+function getIntegration(id: IntegrationId, config: ProjectConfig): Integration {
+  if (id === 'ai-sdk') {
+    return createAiSdkIntegration(config.aiProvider ?? 'openai');
+  }
+  return staticIntegrations[id]!;
+}
+
 export async function installIntegrations(
   projectPath: string,
-  integrationIds: IntegrationId[]
+  config: ProjectConfig
 ): Promise<void> {
   const allPackages: string[] = [];
   const allDevPackages: string[] = [];
 
   // Collect all packages
-  for (const id of integrationIds) {
-    const integration = integrations[id];
+  for (const id of config.integrations) {
+    const integration = getIntegration(id, config);
     allPackages.push(...integration.packages);
     if (integration.devPackages) {
       allDevPackages.push(...integration.devPackages);
@@ -51,13 +59,13 @@ export async function installIntegrations(
   }
 
   // Run setup for each integration
-  for (const id of integrationIds) {
-    const integration = integrations[id];
+  for (const id of config.integrations) {
+    const integration = getIntegration(id, config);
     await integration.setup(projectPath);
   }
 }
 
-export function getEnvVars(integrationIds: IntegrationId[]): EnvVar[] {
+export function getEnvVars(config: ProjectConfig): EnvVar[] {
   const envVars: EnvVar[] = [
     {
       key: 'NEXT_PUBLIC_APP_URL',
@@ -67,9 +75,13 @@ export function getEnvVars(integrationIds: IntegrationId[]): EnvVar[] {
     },
   ];
 
-  for (const id of integrationIds) {
-    envVars.push(...integrations[id].envVars);
+  for (const id of config.integrations) {
+    const integration = getIntegration(id, config);
+    envVars.push(...integration.envVars);
   }
 
   return envVars;
 }
+
+// Export for backwards compatibility
+export const integrations = staticIntegrations;

@@ -60,7 +60,7 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string;
 |-------------|----------|---------|
 | **Clerk** | `@clerk/nextjs` | Authentication and user management |
 | **Neon + Drizzle** | `drizzle-orm`, `@neondatabase/serverless`, `drizzle-kit` | Serverless Postgres with TypeScript ORM |
-| **Vercel AI SDK** | `ai`, `@ai-sdk/openai` | AI integration with structured generation |
+| **Vercel AI SDK** | `ai`, `@ai-sdk/openai` or `anthropic` or `google` | AI integration with structured generation |
 | **Resend** | `resend` | Email API |
 | **Firecrawl** | `@mendable/firecrawl-js` | Web scraping |
 | **Inngest** | `inngest` | Background jobs and workflows |

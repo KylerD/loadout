@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import type { IntegrationId } from './types.js';
+import type { IntegrationId, ProjectConfig, AIProviderChoice } from './types.js';
+import { getAiConfigVar } from './templates/ai-sdk.js';
 
 interface ConfigVar {
   name: string;
@@ -9,7 +10,7 @@ interface ConfigVar {
   defaultValue?: string;
 }
 
-const configVars: Record<IntegrationId | 'core', ConfigVar[]> = {
+const staticConfigVars: Record<Exclude<IntegrationId, 'ai-sdk'> | 'core', ConfigVar[]> = {
   core: [
     { name: 'APP_URL', envKey: 'NEXT_PUBLIC_APP_URL', isPublic: true },
   ],
@@ -19,9 +20,6 @@ const configVars: Record<IntegrationId | 'core', ConfigVar[]> = {
   ],
   'neon-drizzle': [
     { name: 'DATABASE_URL', envKey: 'DATABASE_URL', isPublic: false },
-  ],
-  'ai-sdk': [
-    { name: 'OPENAI_API_KEY', envKey: 'OPENAI_API_KEY', isPublic: false },
   ],
   resend: [
     { name: 'RESEND_API_KEY', envKey: 'RESEND_API_KEY', isPublic: false },
@@ -54,11 +52,19 @@ const configVars: Record<IntegrationId | 'core', ConfigVar[]> = {
   ],
 };
 
+function getConfigVars(id: IntegrationId | 'core', aiProvider?: AIProviderChoice): ConfigVar[] {
+  if (id === 'ai-sdk') {
+    const aiVar = getAiConfigVar(aiProvider ?? 'openai');
+    return [{ name: aiVar.name, envKey: aiVar.envKey, isPublic: false }];
+  }
+  return staticConfigVars[id] ?? [];
+}
+
 export async function generateConfig(
   projectPath: string,
-  integrationIds: IntegrationId[]
+  config: ProjectConfig
 ): Promise<void> {
-  const selectedIds: (IntegrationId | 'core')[] = ['core', ...integrationIds];
+  const selectedIds: (IntegrationId | 'core')[] = ['core', ...config.integrations];
 
   let content = `// Environment configuration
 // All environment variables are exported from here for type-safe access
@@ -67,7 +73,7 @@ export async function generateConfig(
 `;
 
   for (const id of selectedIds) {
-    const vars = configVars[id];
+    const vars = getConfigVars(id, config.aiProvider);
     if (!vars || vars.length === 0) continue;
 
     const sectionName = id === 'core' ? 'Core' : id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, ' ');

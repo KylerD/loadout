@@ -1,5 +1,5 @@
-import { input, confirm } from '@inquirer/prompts';
-import type { IntegrationId, ProjectConfig } from './types.js';
+import { input, confirm, select } from '@inquirer/prompts';
+import type { IntegrationId, ProjectConfig, AIProviderChoice } from './types.js';
 
 export async function getProjectConfig(): Promise<ProjectConfig> {
   const name = await input({
@@ -15,6 +15,7 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
   });
 
   const integrations: IntegrationId[] = [];
+  let aiProvider: AIProviderChoice | undefined;
 
   // Authentication
   if (await confirm({ message: 'Add Clerk for authentication?', default: false })) {
@@ -29,6 +30,14 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
   // AI
   if (await confirm({ message: 'Add Vercel AI SDK?', default: false })) {
     integrations.push('ai-sdk');
+    aiProvider = await select({
+      message: 'Which AI provider?',
+      choices: [
+        { value: 'openai' as const, name: 'OpenAI (GPT-4o)' },
+        { value: 'anthropic' as const, name: 'Anthropic (Claude)' },
+        { value: 'google' as const, name: 'Google (Gemini)' },
+      ],
+    });
   }
 
   // Email
@@ -66,5 +75,5 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
     integrations.push('sentry');
   }
 
-  return { name, integrations };
+  return { name, integrations, aiProvider };
 }

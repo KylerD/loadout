@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import type { IntegrationId } from './types.js';
-import { integrations, getEnvVars } from './integrations/index.js';
+import type { IntegrationId, ProjectConfig, AIProviderChoice } from './types.js';
+import { getAiEnvVar } from './templates/ai-sdk.js';
 
 interface EnvSection {
   name: string;
@@ -9,7 +9,7 @@ interface EnvSection {
   vars: { key: string; example: string; description: string }[];
 }
 
-const envSections: Record<IntegrationId | 'core', EnvSection> = {
+const staticEnvSections: Record<Exclude<IntegrationId, 'ai-sdk'> | 'core', EnvSection> = {
   core: {
     name: 'CORE',
     vars: [
@@ -22,8 +22,6 @@ const envSections: Record<IntegrationId | 'core', EnvSection> = {
     vars: [
       { key: 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', example: 'pk_test_...', description: 'Clerk publishable key' },
       { key: 'CLERK_SECRET_KEY', example: 'sk_test_...', description: 'Clerk secret key' },
-      { key: 'NEXT_PUBLIC_CLERK_SIGN_IN_URL', example: '/sign-in', description: 'Sign in URL' },
-      { key: 'NEXT_PUBLIC_CLERK_SIGN_UP_URL', example: '/sign-up', description: 'Sign up URL' },
     ],
   },
   'neon-drizzle': {
@@ -31,13 +29,6 @@ const envSections: Record<IntegrationId | 'core', EnvSection> = {
     url: 'https://console.neon.tech',
     vars: [
       { key: 'DATABASE_URL', example: 'postgresql://user:pass@host/db?sslmode=require', description: 'Neon database connection string' },
-    ],
-  },
-  'ai-sdk': {
-    name: 'OPENAI - AI',
-    url: 'https://platform.openai.com/api-keys',
-    vars: [
-      { key: 'OPENAI_API_KEY', example: 'sk-...', description: 'OpenAI API key' },
     ],
   },
   resend: {
@@ -99,6 +90,33 @@ const envSections: Record<IntegrationId | 'core', EnvSection> = {
   },
 };
 
+function getAiEnvSection(provider: AIProviderChoice): EnvSection {
+  const envVar = getAiEnvVar(provider);
+  const urls: Record<AIProviderChoice, string> = {
+    openai: 'https://platform.openai.com/api-keys',
+    anthropic: 'https://console.anthropic.com/settings/keys',
+    google: 'https://aistudio.google.com/apikey',
+  };
+  const names: Record<AIProviderChoice, string> = {
+    openai: 'OPENAI - AI',
+    anthropic: 'ANTHROPIC - AI',
+    google: 'GOOGLE - AI',
+  };
+
+  return {
+    name: names[provider],
+    url: urls[provider],
+    vars: [envVar],
+  };
+}
+
+function getEnvSection(id: IntegrationId | 'core', aiProvider?: AIProviderChoice): EnvSection {
+  if (id === 'ai-sdk') {
+    return getAiEnvSection(aiProvider ?? 'openai');
+  }
+  return staticEnvSections[id];
+}
+
 function generateEnvSection(section: EnvSection, includeExamples: boolean): string {
   let content = `# ===========================================\n`;
   content += `# ${section.name}\n`;
@@ -120,22 +138,24 @@ function generateEnvSection(section: EnvSection, includeExamples: boolean): stri
 
 export async function generateEnvFiles(
   projectPath: string,
-  integrationIds: IntegrationId[]
+  config: ProjectConfig
 ): Promise<void> {
-  const selectedSections: (IntegrationId | 'core')[] = ['core', ...integrationIds];
+  const selectedIds: (IntegrationId | 'core')[] = ['core', ...config.integrations];
 
   // Generate .env.example with all vars and examples
   let envExample = '';
-  for (const id of selectedSections) {
-    envExample += generateEnvSection(envSections[id], true);
+  for (const id of selectedIds) {
+    const section = getEnvSection(id, config.aiProvider);
+    envExample += generateEnvSection(section, true);
     envExample += '\n';
   }
   await fs.writeFile(path.join(projectPath, '.env.example'), envExample.trim() + '\n');
 
   // Generate .env.local with empty values
   let envLocal = '';
-  for (const id of selectedSections) {
-    envLocal += generateEnvSection(envSections[id], false);
+  for (const id of selectedIds) {
+    const section = getEnvSection(id, config.aiProvider);
+    envLocal += generateEnvSection(section, false);
     envLocal += '\n';
   }
   await fs.writeFile(path.join(projectPath, '.env.local'), envLocal.trim() + '\n');

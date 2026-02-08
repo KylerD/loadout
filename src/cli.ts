@@ -41,14 +41,14 @@ export async function main() {
     // Install and setup integrations
     if (config.integrations.length > 0) {
       spinner.start(`Setting up ${config.integrations.length} integration(s)...`);
-      await installIntegrations(projectPath, config.integrations);
+      await installIntegrations(projectPath, config);
       spinner.succeed('Integrations configured');
     }
 
     // Generate config and environment files
     spinner.start('Generating config and environment files...');
-    await generateConfig(projectPath, config.integrations);
-    await generateEnvFiles(projectPath, config.integrations);
+    await generateConfig(projectPath, config);
+    await generateEnvFiles(projectPath, config);
     spinner.succeed('Config and environment files created');
 
     // Generate project files
