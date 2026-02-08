@@ -101,6 +101,11 @@ export async function generateClaudeMd(
     (section) => section.id === 'core' || config.integrations.includes(section.id as IntegrationId)
   );
 
+  const hasDb = config.integrations.includes('neon-drizzle');
+  const hasPostHog = config.integrations.includes('posthog');
+  const hasSentry = config.integrations.includes('sentry');
+  const hasClerk = config.integrations.includes('clerk');
+
   let content = `# ${config.name}
 
 ## Tech Stack
@@ -115,50 +120,7 @@ export async function generateClaudeMd(
     content += '\n';
   }
 
-  // Add project structure section
-  content += `## Project Structure
-
-\`\`\`
-├── app/              # Next.js App Router pages and API routes
-├── components/       # React components (including shadcn/ui)
-`;
-
-  if (config.integrations.includes('resend')) {
-    content += `│   └── emails/       # React Email templates\n`;
-  }
-
-  const hasPostHog = config.integrations.includes('posthog');
-  const hasSentry = config.integrations.includes('sentry');
-
-  if (hasPostHog || hasSentry) {
-    content += `├── instrumentation-client.ts  # Client-side init (analytics/errors)\n`;
-  }
-  if (hasSentry) {
-    content += `├── instrumentation.ts         # Server-side Sentry registration\n`;
-  }
-
-  content += `├── lib/              # Configuration and service clients
-│   ├── config.ts     # Centralized environment variables
-│   └── *.client.ts   # Provider client configurations
-├── services/         # Business logic services
-│   └── *.service.ts
-└── ...
-\`\`\`
-
-## Architecture
-
-This project follows a **service-oriented architecture**:
-
-- **\`lib/config.ts\`** - All environment variables exported with type safety
-  \`\`\`typescript
-  export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY as string;
-  \`\`\`
-- **\`lib/*.client.ts\`** - Provider client configurations (import from config)
-- **\`services/*.service.ts\`** - Business logic with constructor-based DI
-- **\`components/\`** - React components
-- **\`app/api/\`** - API routes (only for external APIs)
-
-## Development
+  content += `## Development Commands
 
 \`\`\`bash
 npm run dev       # Start development server
@@ -168,7 +130,7 @@ npm run lint      # Run ESLint
 \`\`\`
 `;
 
-  if (config.integrations.includes('neon-drizzle')) {
+  if (hasDb) {
     content += `
 ### Database Commands
 
@@ -191,22 +153,210 @@ npm run inngest:dev  # Start Inngest dev server for local testing
   }
 
   content += `
+## Architecture
+
+### Directory Structure
+
+\`\`\`
+├── app/                    # Next.js App Router pages and API routes
+├── components/             # React components (including shadcn/ui)
+`;
+
+  if (config.integrations.includes('resend')) {
+    content += `│   └── emails/             # React Email templates
+`;
+  }
+
+  if (hasPostHog || hasSentry) {
+    content += `├── instrumentation-client.ts  # Client-side init
+`;
+  }
+  if (hasSentry) {
+    content += `├── instrumentation.ts         # Server-side Sentry registration
+`;
+  }
+
+  if (hasDb) {
+    content += `├── actions/                # Server actions (form submissions)
+│   └── *.actions.ts
+├── services/               # Business logic orchestration
+│   └── *.service.ts
+├── dao/                    # Data access objects (database queries)
+│   └── *.dao.ts
+├── mappers/                # Data transformation
+│   └── *.mapper.ts
+├── models/                 # Type definitions
+│   ├── *.dto.ts            # Database types (InferSelectModel)
+│   ├── *.view.ts           # View models for UI
+│   ├── *.schema.ts         # Zod validation + ServiceRequest/Result
+│   └── *.state.ts          # Action state objects
+`;
+  } else {
+    content += `├── services/               # Business logic services
+│   └── *.service.ts
+`;
+  }
+
+  content += `├── lib/
+│   ├── config.ts           # Centralized environment variables
+`;
+
+  if (hasDb) {
+    content += `│   └── db/                 # Database client and schema
+`;
+  }
+
+  content += `└── public/                 # Static assets
+\`\`\`
+`;
+
+  if (hasDb) {
+    content += `
+### Layered Architecture
+
+The application follows a strict 4-layer architecture:
+
+\`\`\`
+UI Components (app/, components/)
+    ↓
+Server Actions (actions/*.actions.ts)
+    ↓
+Services (services/*.service.ts)
+    ↓
+DAOs (dao/*.dao.ts)
+    ↓
+Database (Drizzle ORM)
+\`\`\`
+
+**Layer responsibilities:**
+
+- **Actions** - Handle form submissions, validate with Zod, check auth, call services, revalidate cache
+- **Services** - Orchestrate business logic, coordinate multiple DAOs
+- **DAOs** - Encapsulate all database queries using Drizzle ORM
+- **Mappers** - Transform between DTOs, service requests, and view models
+
+### Model File Naming Conventions
+
+Files in \`models/\` follow strict naming:
+
+| Pattern | Purpose | Example |
+|---------|---------|---------|
+| \`*.dto.ts\` | Database types from Drizzle | \`UserDto\`, \`UserInsertDto\` |
+| \`*.view.ts\` | View models for UI | \`UserView\` |
+| \`*.schema.ts\` | Zod schemas + service types | \`UserCreateFormSchema\`, \`UserCreateServiceRequest\` |
+| \`*.state.ts\` | Action state objects | \`UserCreateState\` |
+
+### Server Action Pattern
+
+\`\`\`typescript
+'use server';
+
+export async function createEntity(
+  state: EntityCreateState,
+  formData: FormData
+): Promise<EntityCreateState> {
+  const user = await currentUser();
+  if (!user) {
+    return { success: false, error: 'Not authenticated', data: null };
+  }
+
+  const rawData = Object.fromEntries(formData);
+  const validated = EntityCreateSchema.safeParse(rawData);
+
+  if (!validated.success) {
+    return { success: false, error: z.prettifyError(validated.error), data: null };
+  }
+
+  try {
+    const result = await entityService.createEntity(validated.data);
+    revalidatePath('/entities');
+    return { success: true, error: null, data: result };
+  } catch (error) {
+    return { success: false, error: 'Failed to create entity', data: null };
+  }
+}
+\`\`\`
+
+### DAO Pattern
+
+\`\`\`typescript
+export class EntityDAO {
+  async create(dto: EntityInsertDto): Promise<EntityDto | undefined> {
+    const [created] = await db.insert(entities).values(dto).returning();
+    return created;
+  }
+
+  async getById(id: string): Promise<EntityDto | undefined> {
+    return await db.query.entities.findFirst({
+      where: eq(entities.id, id),
+    });
+  }
+}
+
+export const entityDAO = new EntityDAO();
+\`\`\`
+`;
+  }
+
+  content += `
+## Code Style
+
+### No Comments
+
+Do not add comments to the codebase. Code should be self-documenting through:
+- Clear, descriptive variable and function names
+- Proper TypeScript types
+- Logical code structure
+- Small, focused functions
+
+### Closure Variable Naming
+
+Always use verbose singular names in closures (\`.map()\`, \`.filter()\`, etc.):
+
+\`\`\`typescript
+// ✅ Correct
+users.map((user) => user.email)
+items.filter((item) => item.isActive)
+
+// ❌ Wrong
+users.map((u) => u.email)
+items.filter((i) => i.isActive)
+\`\`\`
+
 ## Environment Variables
 
 Copy \`.env.example\` to \`.env.local\` and fill in your API keys.
 
-See \`.env.example\` for all required variables and setup instructions.
-
-**Important:** Import environment variables from \`@/lib/config\` instead of \`process.env\`:
+**Important:** Import environment variables from \`@/lib/config\`:
 
 \`\`\`typescript
-// Good
+// ✅ Good
 import { STRIPE_SECRET_KEY } from '@/lib/config';
 
-// Avoid
+// ❌ Avoid
 const key = process.env.STRIPE_SECRET_KEY;
 \`\`\`
 `;
+
+  if (hasClerk) {
+    content += `
+## Authentication
+
+**Provider:** Clerk
+
+- Route protection via \`proxy.ts\` (Next.js 16+)
+- Use \`currentUser()\` in Server Components and Actions for auth checks
+- Client-side: Use Clerk hooks (\`useUser()\`, \`useAuth()\`, \`<SignedIn>\`, \`<SignedOut>\`)
+
+\`\`\`typescript
+// Server-side auth check
+const user = await currentUser();
+if (!user) {
+  return redirect('/');
+}
+\`\`\`
+`;
+  }
 
   await fs.writeFile(path.join(projectPath, 'CLAUDE.md'), content);
 }

@@ -26,29 +26,84 @@ export const neonDrizzleIntegration: Integration = {
     // Create lib/db directory
     await fs.mkdir(path.join(projectPath, 'lib/db'), { recursive: true });
 
-    // Create database client
     await fs.writeFile(
       path.join(projectPath, 'lib/db/client.ts'),
       neonDrizzleTemplates.dbClient
     );
 
-    // Create schema
     await fs.writeFile(
       path.join(projectPath, 'lib/db/schema.ts'),
       neonDrizzleTemplates.schema
     );
 
-    // Create index re-export
     await fs.writeFile(
       path.join(projectPath, 'lib/db/index.ts'),
       neonDrizzleTemplates.dbIndex
     );
 
-    // Create services directory and database service
-    await fs.mkdir(path.join(projectPath, 'services'), { recursive: true });
+    // Create models directory
+    await fs.mkdir(path.join(projectPath, 'models'), { recursive: true });
+
     await fs.writeFile(
-      path.join(projectPath, 'services/database.service.ts'),
-      neonDrizzleTemplates.dbService
+      path.join(projectPath, 'models/todo.dto.ts'),
+      neonDrizzleTemplates.todoDto
+    );
+
+    await fs.writeFile(
+      path.join(projectPath, 'models/todo.view.ts'),
+      neonDrizzleTemplates.todoView
+    );
+
+    await fs.writeFile(
+      path.join(projectPath, 'models/todoCreate.schema.ts'),
+      neonDrizzleTemplates.todoCreateSchema
+    );
+
+    await fs.writeFile(
+      path.join(projectPath, 'models/todoCreate.state.ts'),
+      neonDrizzleTemplates.todoCreateState
+    );
+
+    await fs.writeFile(
+      path.join(projectPath, 'models/todoUpdate.schema.ts'),
+      neonDrizzleTemplates.todoUpdateSchema
+    );
+
+    await fs.writeFile(
+      path.join(projectPath, 'models/todoUpdate.state.ts'),
+      neonDrizzleTemplates.todoUpdateState
+    );
+
+    // Create dao directory
+    await fs.mkdir(path.join(projectPath, 'dao'), { recursive: true });
+
+    await fs.writeFile(
+      path.join(projectPath, 'dao/todo.dao.ts'),
+      neonDrizzleTemplates.todoDao
+    );
+
+    // Create mappers directory
+    await fs.mkdir(path.join(projectPath, 'mappers'), { recursive: true });
+
+    await fs.writeFile(
+      path.join(projectPath, 'mappers/todo.mapper.ts'),
+      neonDrizzleTemplates.todoMapper
+    );
+
+    // Create services directory
+    await fs.mkdir(path.join(projectPath, 'services'), { recursive: true });
+
+    await fs.writeFile(
+      path.join(projectPath, 'services/todo.service.ts'),
+      neonDrizzleTemplates.todoService
+    );
+
+    // Create actions directory
+    await fs.mkdir(path.join(projectPath, 'actions'), { recursive: true });
+
+    await fs.writeFile(
+      path.join(projectPath, 'actions/todo.actions.ts'),
+      neonDrizzleTemplates.todoActions
     );
 
     // Update package.json with db scripts

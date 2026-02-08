@@ -32,24 +32,49 @@ npm create loadout
 
 ## Architecture
 
-Generated projects follow a **service-oriented architecture**:
+Generated projects follow a **layered architecture** with clear separation of concerns:
+
+```
+UI Components (app/, components/)
+    ↓
+Server Actions (actions/*.actions.ts)
+    ↓
+Services (services/*.service.ts)
+    ↓
+DAOs (dao/*.dao.ts)
+    ↓
+Database (Drizzle ORM)
+```
+
+### Directory Structure
 
 ```
 ├── app/                    # Next.js App Router pages and API routes
 ├── components/             # React components (including shadcn/ui)
 │   └── emails/             # Email templates (if Resend selected)
-├── lib/                    # Client instances and utilities
-│   ├── config.ts           # Centralized environment variables
-│   └── *.client.ts
-├── services/               # Business logic services
+├── actions/                # Server actions (form submissions)
+│   └── *.actions.ts
+├── services/               # Business logic orchestration
 │   └── *.service.ts
+├── dao/                    # Data access objects (database queries)
+│   └── *.dao.ts
+├── mappers/                # Data transformation
+│   └── *.mapper.ts
+├── models/                 # Type definitions
+│   ├── *.dto.ts            # Database types (InferSelectModel)
+│   ├── *.view.ts           # View models for UI
+│   ├── *.schema.ts         # Zod validation + ServiceRequest/Result
+│   └── *.state.ts          # Action state objects
+├── lib/
+│   ├── config.ts           # Centralized environment variables
+│   └── db/                 # Database client and schema
+└── ...
 ```
 
 Services use **constructor-based dependency injection** with singleton exports for Next.js serverless compatibility.
 
 All environment variables are centralized in `lib/config.ts` for type-safe access:
 ```typescript
-// lib/config.ts
 export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY as string;
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string;
 ```
@@ -73,7 +98,7 @@ All projects include `zod` for schema validation and `shadcn/ui` for components.
 
 ## Generated Files
 
-Each integration generates a service and supporting files:
+Each integration generates appropriate files following the layered architecture:
 
 ### Clerk
 - `services/user.service.ts` - Server-side user lookups (getUserById, etc.)
@@ -82,13 +107,23 @@ Each integration generates a service and supporting files:
 - Client-side: Use Clerk hooks (`useUser()`, `useAuth()`) directly
 
 ### Neon + Drizzle
+
+Generates a complete Todo example demonstrating the full architecture:
+
+- `lib/db/schema.ts` - Database schema with `todos` table
 - `lib/db/client.ts` - Database client
-- `lib/db/schema.ts` - Example schema
-- `services/database.service.ts` - CRUD operations
+- `models/todo.dto.ts` - Database types (`TodoDto`, `TodoInsertDto`)
+- `models/todo.view.ts` - View model for UI
+- `models/todoCreate.schema.ts` - Zod schema + service types
+- `models/todoCreate.state.ts` - Action state
+- `dao/todo.dao.ts` - Database queries
+- `mappers/todo.mapper.ts` - DTO ↔ View transformations
+- `services/todo.service.ts` - Business logic
+- `actions/todo.actions.ts` - Server actions
 - `drizzle.config.ts` - Drizzle Kit config
 
 ### Vercel AI SDK
-- `services/ai.service.ts` - AI operations (generateObject, generateText, streamText)
+- `services/ai.service.ts` - AI operations (generateObject, generateText)
 
 ### Resend
 - `services/email.service.ts` - Email sending operations
