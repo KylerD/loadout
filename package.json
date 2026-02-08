@@ -1,0 +1,40 @@
+{
+  "name": "create-loadout",
+  "version": "1.0.0",
+  "description": "Custom Next.js scaffolding CLI with optional SaaS integrations",
+  "type": "module",
+  "bin": {
+    "create-loadout": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "nextjs",
+    "cli",
+    "scaffolding",
+    "saas",
+    "boilerplate"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@inquirer/prompts": "^7.0.0",
+    "chalk": "^5.0.0",
+    "ora": "^8.0.0",
+    "execa": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
