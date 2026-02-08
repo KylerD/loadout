@@ -18,6 +18,7 @@ const stackSections: StackSection[] = [
       { name: 'Tailwind CSS', url: 'https://tailwindcss.com/docs', description: 'Utility-first CSS' },
       { name: 'shadcn/ui', url: 'https://ui.shadcn.com/docs', description: 'UI components' },
       { name: 'Zod', url: 'https://zod.dev/', description: 'Schema validation' },
+      { name: 'Zustand', url: 'https://zustand.docs.pmnd.rs/', description: 'Client state management' },
     ],
   },
   {
@@ -199,6 +200,8 @@ npm run inngest:dev  # Start Inngest dev server for local testing
 
   content += `├── lib/
 │   ├── config.ts           # Centralized environment variables
+│   ├── stores/             # Zustand stores for client state
+│   │   └── *.store.ts
 `;
 
   if (hasDb) {
@@ -299,6 +302,55 @@ export const entityDAO = new EntityDAO();
   }
 
   content += `
+## Client State Management (Zustand)
+
+For complex multi-step forms or flows, use Zustand stores.
+
+**Store location**: \`lib/stores/*.store.ts\`
+
+### Store Pattern
+
+\`\`\`typescript
+import { createStore, useStore } from 'zustand';
+
+interface FormState {
+  title: string;
+  description: string;
+  setTitle: (title: string) => void;
+  setDescription: (description: string) => void;
+  reset: () => void;
+}
+
+const initialState = {
+  title: '',
+  description: '',
+};
+
+export const formStore = createStore<FormState>()((set) => ({
+  ...initialState,
+  setTitle: (title) => set({ title }),
+  setDescription: (description) => set({ description }),
+  reset: () => set(initialState),
+}));
+
+export const useFormStore = <T>(selector: (state: FormState) => T): T => {
+  return useStore(formStore, selector);
+};
+\`\`\`
+
+### Usage in Components
+
+\`\`\`typescript
+'use client';
+
+function MyForm() {
+  const title = useFormStore((state) => state.title);
+  const setTitle = useFormStore((state) => state.setTitle);
+
+  return <input value={title} onChange={(e) => setTitle(e.target.value)} />;
+}
+\`\`\`
+
 ## Code Style
 
 ### No Comments

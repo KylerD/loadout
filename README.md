@@ -94,7 +94,7 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string;
 | **PostHog** | `posthog-js` | Product analytics |
 | **Sentry** | `@sentry/nextjs` | Error tracking |
 
-All projects include `zod` for schema validation and `shadcn/ui` for components.
+All projects include `zod` for schema validation, `zustand` for client state management, and `shadcn/ui` for components.
 
 ## Generated Files
 

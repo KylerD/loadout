@@ -1,5 +1,7 @@
 import chalk from 'chalk';
 import ora from 'ora';
+import fs from 'fs/promises';
+import path from 'path';
 import { getProjectConfig } from './prompts.js';
 import { createNextApp } from './create-next.js';
 import { setupShadcn } from './setup-shadcn.js';
@@ -12,6 +14,7 @@ import {
   generateInstrumentationClient,
   generateInstrumentation,
 } from './instrumentation.js';
+import { zustandTemplates } from './templates/zustand.js';
 import type { ProjectConfig } from './types.js';
 
 export async function main() {
@@ -36,11 +39,18 @@ export async function main() {
     await setupShadcn(projectPath);
     spinner.succeed('shadcn/ui configured');
 
-    // Install zod (always included)
-    spinner.start('Installing zod...');
+    // Install base packages (always included)
+    spinner.start('Installing base packages...');
     const { execa } = await import('execa');
-    await execa('npm', ['install', 'zod@^3.24'], { cwd: projectPath });
-    spinner.succeed('Zod installed');
+    await execa('npm', ['install', 'zod@^3.24', 'zustand@^5'], { cwd: projectPath });
+    spinner.succeed('Base packages installed (zod, zustand)');
+
+    // Create example Zustand store
+    await fs.mkdir(path.join(projectPath, 'lib/stores'), { recursive: true });
+    await fs.writeFile(
+      path.join(projectPath, 'lib/stores/counter.store.ts'),
+      zustandTemplates.exampleStore
+    );
 
     // Install and setup integrations
     if (config.integrations.length > 0) {
