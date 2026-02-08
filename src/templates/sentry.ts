@@ -1,8 +1,9 @@
 export const sentryTemplates = {
   clientConfig: `import * as Sentry from '@sentry/nextjs';
+import { SENTRY_DSN } from '@/lib/config';
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: SENTRY_DSN,
   environment: process.env.NODE_ENV,
   sendDefaultPii: false,
 
@@ -46,9 +47,10 @@ Sentry.init({
 `,
 
   serverConfig: `import * as Sentry from '@sentry/nextjs';
+import { SENTRY_DSN } from '@/lib/config';
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: SENTRY_DSN,
   environment: process.env.NODE_ENV,
   sendDefaultPii: false,
 
@@ -83,9 +85,10 @@ Sentry.init({
 `,
 
   edgeConfig: `import * as Sentry from '@sentry/nextjs';
+import { SENTRY_DSN } from '@/lib/config';
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: SENTRY_DSN,
   environment: process.env.NODE_ENV,
   sendDefaultPii: false,
 
@@ -217,12 +220,13 @@ export const errorService = new ErrorService();
 
   nextConfig: `import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
+import { SENTRY_ORG, SENTRY_PROJECT } from './lib/config';
 
 const nextConfig: NextConfig = {};
 
 export default withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
+  org: SENTRY_ORG,
+  project: SENTRY_PROJECT,
   silent: !process.env.CI,
   widenClientFileUpload: true,
   tunnelRoute: '/monitoring',

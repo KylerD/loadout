@@ -1,12 +1,13 @@
 export const neonDrizzleTemplates = {
   drizzleConfig: `import { defineConfig } from 'drizzle-kit';
+import { DATABASE_URL } from './lib/config';
 
 export default defineConfig({
   schema: './lib/db/schema.ts',
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    url: DATABASE_URL,
   },
 });
 `,
@@ -15,9 +16,10 @@ export default defineConfig({
   dbClient: `import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from './schema';
+import { DATABASE_URL } from '@/lib/config';
 
 // Create the Neon SQL client
-const sql = neon(process.env.DATABASE_URL!);
+const sql = neon(DATABASE_URL);
 
 // Create and export the Drizzle instance
 export const db = drizzle(sql, { schema });

@@ -12,6 +12,7 @@ src/
 ├── create-next.ts        # Wraps create-next-app
 ├── setup-shadcn.ts       # Initializes shadcn/ui
 ├── types.ts              # Shared TypeScript types
+├── config.ts             # Generates lib/config.ts with env var exports
 ├── env.ts                # Generates .env.example and .env.local
 ├── claude-md.ts          # Generates CLAUDE.md for projects
 ├── generate-readme.ts    # Generates README.md and .gitignore
@@ -26,11 +27,20 @@ src/
 
 ### Service-Oriented Architecture
 Generated projects follow this structure:
+- `lib/config.ts` - Centralized environment variables (type-safe exports)
 - `lib/*.client.ts` - Provider client configurations (only when needed)
 - `services/*.service.ts` - Business logic with constructor-based DI
+- `components/emails/` - Email templates (if Resend selected)
 - Singleton exports at bottom for Next.js serverless compatibility
 
 ```typescript
+// lib/config.ts - All env vars centralized
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY as string;
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string;
+
+// services/*.service.ts - Import from config, not process.env
+import { STRIPE_SECRET_KEY } from '@/lib/config';
+
 export class SomeService {
   constructor(private dependency: Dependency) {}
   // methods...
@@ -61,7 +71,7 @@ Generated projects use Next.js default structure (no `--src-dir` flag).
 | `clerk` | Authentication | `services/user.service.ts`, `proxy.ts` |
 | `neon-drizzle` | Database | `lib/db/client.ts`, `services/database.service.ts` |
 | `ai-sdk` | AI | `services/ai.service.ts` |
-| `resend` | Email | `services/email.service.ts`, `emails/` |
+| `resend` | Email | `services/email.service.ts`, `components/emails/` |
 | `firecrawl` | Scraping | `services/scrape.service.ts` |
 | `inngest` | Background Jobs | `lib/inngest.client.ts`, `services/jobs.service.ts` |
 | `uploadthing` | File Uploads | `lib/uploadthing.client.ts`, `services/file.service.ts` |

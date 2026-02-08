@@ -1,6 +1,7 @@
 export const stripeTemplates = {
   // Payment service with constructor-based DI
   paymentService: `import Stripe from 'stripe';
+import { STRIPE_SECRET_KEY } from '@/lib/config';
 
 export interface CreateCheckoutOptions {
   priceId: string;
@@ -100,7 +101,7 @@ export class PaymentService {
 }
 
 // Export singleton instance
-export const paymentService = new PaymentService(process.env.STRIPE_SECRET_KEY!);
+export const paymentService = new PaymentService(STRIPE_SECRET_KEY);
 
 // Re-export Stripe types for convenience
 export type { Stripe };
@@ -108,6 +109,7 @@ export type { Stripe };
 
   checkoutRoute: `import { NextResponse } from 'next/server';
 import { paymentService } from '@/services/payment.service';
+import { APP_URL } from '@/lib/config';
 import { z } from 'zod';
 
 const checkoutSchema = z.object({
@@ -123,8 +125,8 @@ export async function POST(req: Request) {
     const session = await paymentService.createCheckoutSession({
       priceId,
       customerId,
-      successUrl: \`\${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}\`,
-      cancelUrl: \`\${process.env.NEXT_PUBLIC_APP_URL}/pricing\`,
+      successUrl: \`\${APP_URL}/success?session_id={CHECKOUT_SESSION_ID}\`,
+      cancelUrl: \`\${APP_URL}/pricing\`,
     });
 
     return NextResponse.json({ url: session.url });
@@ -146,6 +148,7 @@ export async function POST(req: Request) {
   webhooksRoute: `import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { paymentService, type Stripe } from '@/services/payment.service';
+import { STRIPE_WEBHOOK_SECRET } from '@/lib/config';
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -155,11 +158,7 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
-    event = paymentService.constructWebhookEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = paymentService.constructWebhookEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (error) {
     console.error('Webhook signature verification failed:', error);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
@@ -212,6 +211,7 @@ export async function POST(req: Request) {
 
   portalRoute: `import { NextResponse } from 'next/server';
 import { paymentService } from '@/services/payment.service';
+import { APP_URL } from '@/lib/config';
 import { z } from 'zod';
 
 const portalSchema = z.object({
@@ -225,7 +225,7 @@ export async function POST(req: Request) {
 
     const session = await paymentService.createPortalSession({
       customerId,
-      returnUrl: \`\${process.env.NEXT_PUBLIC_APP_URL}/account\`,
+      returnUrl: \`\${APP_URL}/account\`,
     });
 
     return NextResponse.json({ url: session.url });

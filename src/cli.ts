@@ -6,6 +6,7 @@ import { setupShadcn } from './setup-shadcn.js';
 import { installIntegrations } from './integrations/index.js';
 import { generateClaudeMd } from './claude-md.js';
 import { generateEnvFiles } from './env.js';
+import { generateConfig } from './config.js';
 import { generateReadme, generateGitignore } from './generate-readme.js';
 import type { ProjectConfig } from './types.js';
 
@@ -44,10 +45,11 @@ export async function main() {
       spinner.succeed('Integrations configured');
     }
 
-    // Generate environment files
-    spinner.start('Generating environment files...');
+    // Generate config and environment files
+    spinner.start('Generating config and environment files...');
+    await generateConfig(projectPath, config.integrations);
     await generateEnvFiles(projectPath, config.integrations);
-    spinner.succeed('Environment files created');
+    spinner.succeed('Config and environment files created');
 
     // Generate project files
     spinner.start('Generating project files...');

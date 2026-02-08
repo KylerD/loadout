@@ -2,6 +2,7 @@ export const resendTemplates = {
   // Email service with constructor-based DI
   emailService: `import { Resend } from 'resend';
 import type { ReactElement } from 'react';
+import { RESEND_API_KEY, RESEND_FROM_EMAIL } from '@/lib/config';
 
 export interface SendEmailOptions {
   to: string | string[];
@@ -43,7 +44,7 @@ export class EmailService {
    * Send a welcome email to a new user
    */
   async sendWelcome(to: string, name: string) {
-    const { WelcomeEmail } = await import('@/emails/welcome');
+    const { WelcomeEmail } = await import('@/components/emails/welcome');
     return this.send({
       to,
       subject: 'Welcome!',
@@ -53,10 +54,7 @@ export class EmailService {
 }
 
 // Export singleton instance
-export const emailService = new EmailService(
-  process.env.RESEND_API_KEY!,
-  process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
-);
+export const emailService = new EmailService(RESEND_API_KEY, RESEND_FROM_EMAIL);
 `,
 
   welcomeEmail: `import * as React from 'react';

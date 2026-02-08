@@ -5,11 +5,12 @@ export const posthogTemplates = {
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { useEffect } from 'react';
+import { POSTHOG_KEY, POSTHOG_HOST } from '@/lib/config';
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    posthog.init(POSTHOG_KEY, {
+      api_host: POSTHOG_HOST,
       person_profiles: 'identified_only',
       capture_pageview: true,
       capture_pageleave: true,

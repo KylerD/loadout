@@ -28,10 +28,10 @@ export const resendIntegration: Integration = {
       resendTemplates.emailService
     );
 
-    // Create emails directory with example template
-    await fs.mkdir(path.join(projectPath, 'emails'), { recursive: true });
+    // Create email templates in components/emails
+    await fs.mkdir(path.join(projectPath, 'components/emails'), { recursive: true });
     await fs.writeFile(
-      path.join(projectPath, 'emails/welcome.tsx'),
+      path.join(projectPath, 'components/emails/welcome.tsx'),
       resendTemplates.welcomeEmail
     );
 

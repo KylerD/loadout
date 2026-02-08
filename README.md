@@ -35,16 +35,24 @@ npm create loadout
 Generated projects follow a **service-oriented architecture**:
 
 ```
-├── app/           # Next.js App Router pages and API routes
-├── components/    # React components (including shadcn/ui)
-├── lib/           # Client instances and utilities
+├── app/                    # Next.js App Router pages and API routes
+├── components/             # React components (including shadcn/ui)
+│   └── emails/             # Email templates (if Resend selected)
+├── lib/                    # Client instances and utilities
+│   ├── config.ts           # Centralized environment variables
 │   └── *.client.ts
-├── services/      # Business logic services
+├── services/               # Business logic services
 │   └── *.service.ts
-└── emails/        # Email templates (if Resend selected)
 ```
 
 Services use **constructor-based dependency injection** with singleton exports for Next.js serverless compatibility.
+
+All environment variables are centralized in `lib/config.ts` for type-safe access:
+```typescript
+// lib/config.ts
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY as string;
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string;
+```
 
 ## Available Integrations
 
@@ -83,7 +91,7 @@ Each integration generates a service and supporting files:
 
 ### Resend
 - `services/email.service.ts` - Email sending operations
-- `emails/welcome.tsx` - Example email template
+- `components/emails/welcome.tsx` - Example email template
 - `app/api/email/send/route.ts` - Send endpoint
 
 ### Firecrawl

@@ -1,6 +1,7 @@
 export const firecrawlTemplates = {
   // Scraping service with constructor-based DI
   scrapeService: `import FirecrawlApp from '@mendable/firecrawl-js';
+import { FIRECRAWL_API_KEY } from '@/lib/config';
 
 export interface ScrapeResult {
   markdown?: string;
@@ -81,7 +82,7 @@ export class ScrapeService {
 }
 
 // Export singleton instance
-export const scrapeService = new ScrapeService(process.env.FIRECRAWL_API_KEY!);
+export const scrapeService = new ScrapeService(FIRECRAWL_API_KEY);
 `,
 
   scrapeRoute: `import { NextResponse } from 'next/server';

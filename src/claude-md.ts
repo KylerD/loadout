@@ -121,27 +121,32 @@ export async function generateClaudeMd(
 \`\`\`
 ├── app/              # Next.js App Router pages and API routes
 ├── components/       # React components (including shadcn/ui)
-├── lib/              # Utility functions and service clients
-├── services/         # Business logic services
 `;
 
   if (config.integrations.includes('resend')) {
-    content += `├── emails/           # React Email templates\n`;
+    content += `│   └── emails/       # React Email templates\n`;
   }
 
-  content += `└── ...
+  content += `├── lib/              # Configuration and service clients
+│   ├── config.ts     # Centralized environment variables
+│   └── *.client.ts   # Provider client configurations
+├── services/         # Business logic services
+│   └── *.service.ts
+└── ...
 \`\`\`
 
 ## Architecture
 
 This project follows a **service-oriented architecture**:
 
-- **\`lib/\`** - Contains client instances and low-level utilities
-  - \`*.client.ts\` - Provider client configurations
-- **\`services/\`** - Contains business logic services
-  - \`*.service.ts\` - Services that use clients and provide higher-level operations
+- **\`lib/config.ts\`** - All environment variables exported with type safety
+  \`\`\`typescript
+  export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY as string;
+  \`\`\`
+- **\`lib/*.client.ts\`** - Provider client configurations (import from config)
+- **\`services/*.service.ts\`** - Business logic with constructor-based DI
 - **\`components/\`** - React components
-- **\`app/api/\`** - API routes that use services
+- **\`app/api/\`** - API routes (only for external APIs)
 
 ## Development
 
@@ -181,6 +186,16 @@ npm run inngest:dev  # Start Inngest dev server for local testing
 Copy \`.env.example\` to \`.env.local\` and fill in your API keys.
 
 See \`.env.example\` for all required variables and setup instructions.
+
+**Important:** Import environment variables from \`@/lib/config\` instead of \`process.env\`:
+
+\`\`\`typescript
+// Good
+import { STRIPE_SECRET_KEY } from '@/lib/config';
+
+// Avoid
+const key = process.env.STRIPE_SECRET_KEY;
+\`\`\`
 `;
 
   await fs.writeFile(path.join(projectPath, 'CLAUDE.md'), content);
