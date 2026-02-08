@@ -1,65 +1,18 @@
 export const clerkTemplates = {
-  // User service with proper DI
-  userService: `import { auth, currentUser, clerkClient } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+  // User service - SERVER-SIDE ONLY operations using Clerk Backend API
+  // For client-side auth, use Clerk hooks: useUser(), useAuth(), etc.
+  userService: `import { clerkClient } from '@clerk/nextjs/server';
 
+/**
+ * Server-side user operations using Clerk Backend API
+ * For client-side auth state, use Clerk hooks instead:
+ * - useUser() for user data
+ * - useAuth() for auth state
+ * - <SignedIn>, <SignedOut> for conditional rendering
+ */
 export class UserService {
   /**
-   * Get the current authenticated user
-   * Returns null if not authenticated
-   */
-  async getCurrentUser() {
-    return currentUser();
-  }
-
-  /**
-   * Get the current auth state
-   * Returns userId, sessionId, orgId etc.
-   */
-  async getAuth() {
-    return auth();
-  }
-
-  /**
-   * Get the current user ID or throw if not authenticated
-   */
-  async requireUserId(): Promise<string> {
-    const { userId } = await auth();
-    if (!userId) {
-      redirect('/sign-in');
-    }
-    return userId;
-  }
-
-  /**
-   * Get the current user or throw if not authenticated
-   */
-  async requireUser() {
-    const user = await currentUser();
-    if (!user) {
-      redirect('/sign-in');
-    }
-    return user;
-  }
-
-  /**
-   * Check if the current user is authenticated
-   */
-  async isAuthenticated(): Promise<boolean> {
-    const { userId } = await auth();
-    return !!userId;
-  }
-
-  /**
-   * Get the current organization ID if in an org context
-   */
-  async getOrgId(): Promise<string | null> {
-    const { orgId } = await auth();
-    return orgId;
-  }
-
-  /**
-   * Get user by ID using Clerk Backend API
+   * Get user by ID (server-side only)
    */
   async getUserById(userId: string) {
     const client = await clerkClient();
@@ -67,18 +20,39 @@ export class UserService {
   }
 
   /**
-   * Update user metadata
+   * Get user by email (server-side only)
+   */
+  async getUserByEmail(email: string) {
+    const client = await clerkClient();
+    const users = await client.users.getUserList({
+      emailAddress: [email],
+    });
+    return users.data[0] ?? null;
+  }
+
+  /**
+   * Update user metadata (server-side only)
    */
   async updateUserMetadata(
     userId: string,
-    metadata: { publicMetadata?: Record<string, unknown>; privateMetadata?: Record<string, unknown> }
+    metadata: {
+      publicMetadata?: Record<string, unknown>;
+      privateMetadata?: Record<string, unknown>;
+    }
   ) {
     const client = await clerkClient();
     return client.users.updateUserMetadata(userId, metadata);
   }
+
+  /**
+   * Delete a user (server-side only)
+   */
+  async deleteUser(userId: string) {
+    const client = await clerkClient();
+    return client.users.deleteUser(userId);
+  }
 }
 
-// Export singleton instance
 export const userService = new UserService();
 `,
 
@@ -92,7 +66,7 @@ const isPublicRoute = createRouteMatcher([
   '/terms',
 ]);
 
-// Webhook routes that bypass auth (add your webhook endpoints here)
+// Webhook routes that bypass auth
 const isWebhookRoute = createRouteMatcher([
   '/api/webhooks(.*)',
 ]);
@@ -105,9 +79,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };
@@ -145,10 +117,8 @@ export function AuthButtons() {
 `,
 
   wrapLayout: (content: string): string => {
-    // Add ClerkProvider import
     const importStatement = "import { ClerkProvider } from '@clerk/nextjs';\n";
 
-    // Find the import section and add our import
     const importMatch = content.match(/^(import[\s\S]*?from\s+['"][^'"]+['"];\n*)+/m);
     let newContent = content;
 
@@ -160,7 +130,6 @@ export function AuthButtons() {
       newContent = importStatement + content;
     }
 
-    // Wrap body children with ClerkProvider
     newContent = newContent.replace(
       /(<body[^>]*>)([\s\S]*?)(<\/body>)/,
       '$1\n        <ClerkProvider>$2</ClerkProvider>\n      $3'

@@ -51,15 +51,12 @@ export const sentryIntegration: Integration = {
       sentryTemplates.globalError
     );
 
-    // Create error service
-    await fs.mkdir(path.join(projectPath, 'services'), { recursive: true });
-    await fs.writeFile(
-      path.join(projectPath, 'services/error.service.ts'),
-      sentryTemplates.errorService
-    );
-
     // Update next.config.ts to wrap with Sentry
     const nextConfigPath = path.join(projectPath, 'next.config.ts');
     await fs.writeFile(nextConfigPath, sentryTemplates.nextConfig);
+
+    // No service needed - use Sentry directly:
+    // Server: import * as Sentry from '@sentry/nextjs'; Sentry.captureException(error)
+    // Client: Same import, already initialized via instrumentation-client.ts
   },
 };

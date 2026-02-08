@@ -12,11 +12,11 @@ export async function register() {
   }
 }
 
-// Capture errors from Server Components, middleware, and proxies
 export const onRequestError = Sentry.captureRequestError;
 `,
 
   // instrumentation-client.ts - client-side Sentry init (Next.js 15.3+)
+  // Client components can then just: import * as Sentry from '@sentry/nextjs'
   instrumentationClient: `import * as Sentry from '@sentry/nextjs';
 import { SENTRY_DSN } from '@/lib/config';
 
@@ -39,7 +39,6 @@ Sentry.init({
   beforeSend(event) {
     if (process.env.NODE_ENV === 'development') return null;
 
-    // Scrub PII
     if (event.user) {
       delete event.user.email;
       delete event.user.ip_address;
@@ -53,7 +52,6 @@ Sentry.init({
   },
 });
 
-// Instrument router navigations for performance
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 `,
 
@@ -114,66 +112,27 @@ Sentry.init({
   globalError: `'use client';
 
 import * as Sentry from '@sentry/nextjs';
+import NextError from 'next/error';
 import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 
 export default function GlobalError({
   error,
-  reset,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
 }) {
   useEffect(() => {
     Sentry.captureException(error);
   }, [error]);
 
   return (
-    <html>
+    <html lang="en">
       <body>
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-          <h2 className="text-2xl font-bold">Something went wrong!</h2>
-          <p className="text-muted-foreground">
-            We've been notified and are working on a fix.
-          </p>
-          <Button onClick={() => reset()}>Try again</Button>
-        </div>
+        {/* NextError requires statusCode but App Router doesn't expose it, so we pass 0 */}
+        <NextError statusCode={0} />
       </body>
     </html>
   );
 }
-`,
-
-  // Error service for manual error tracking
-  errorService: `import * as Sentry from '@sentry/nextjs';
-
-export class ErrorService {
-  captureException(error: Error, context?: Record<string, unknown>) {
-    Sentry.captureException(error, { extra: context });
-  }
-
-  captureMessage(
-    message: string,
-    level: 'fatal' | 'error' | 'warning' | 'log' | 'info' | 'debug' = 'info'
-  ) {
-    Sentry.captureMessage(message, level);
-  }
-
-  setUser(user: { id: string } | null) {
-    Sentry.setUser(user);
-  }
-
-  addBreadcrumb(breadcrumb: {
-    message: string;
-    category?: string;
-    level?: 'fatal' | 'error' | 'warning' | 'log' | 'info' | 'debug';
-    data?: Record<string, unknown>;
-  }) {
-    Sentry.addBreadcrumb(breadcrumb);
-  }
-}
-
-export const errorService = new ErrorService();
 `,
 
   nextConfig: `import { withSentryConfig } from '@sentry/nextjs';

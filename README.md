@@ -76,9 +76,10 @@ All projects include `zod` for schema validation and `shadcn/ui` for components.
 Each integration generates a service and supporting files:
 
 ### Clerk
-- `services/user.service.ts` - User operations (getCurrentUser, requireAuth, etc.)
+- `services/user.service.ts` - Server-side user lookups (getUserById, etc.)
 - `components/auth-buttons.tsx` - SignInButton/SignUpButton components
 - `proxy.ts` - Route protection (Next.js 16+)
+- Client-side: Use Clerk hooks (`useUser()`, `useAuth()`) directly
 
 ### Neon + Drizzle
 - `lib/db/client.ts` - Database client
@@ -119,15 +120,15 @@ Each integration generates a service and supporting files:
 
 ### PostHog
 - `instrumentation-client.ts` - Lightweight init (Next.js 15.3+)
-- `services/analytics.service.ts` - Analytics helpers and hooks
+- Client-side: Use `posthog` directly (`import posthog from 'posthog-js'`)
 
 ### Sentry
 - `instrumentation.ts` - Server/edge registration (Next.js 15+)
 - `instrumentation-client.ts` - Client-side init (Next.js 15.3+)
 - `sentry.server.config.ts` - Server-side config
 - `sentry.edge.config.ts` - Edge config
-- `services/error.service.ts` - Error capture helpers
 - `app/global-error.tsx` - Error boundary
+- Use `Sentry` directly (`import * as Sentry from '@sentry/nextjs'`)
 
 ## Environment Variables
 

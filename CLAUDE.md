@@ -29,9 +29,12 @@ src/
 Generated projects follow this structure:
 - `lib/config.ts` - Centralized environment variables (type-safe exports)
 - `lib/*.client.ts` - Provider client configurations (only when needed)
-- `services/*.service.ts` - Business logic with constructor-based DI
+- `services/*.service.ts` - **Server-side only** business logic with constructor-based DI
 - `components/emails/` - Email templates (if Resend selected)
 - Singleton exports at bottom for Next.js serverless compatibility
+
+**Important:** Services are strictly server-side. Client-side code (PostHog analytics,
+Clerk auth hooks, Sentry in components) should use the libraries directly, not via services.
 
 ```typescript
 // lib/config.ts - All env vars centralized
@@ -70,7 +73,7 @@ Generated projects use Next.js default structure (no `--src-dir` flag).
 
 | ID | Service | Key Files |
 |----|---------|-----------|
-| `clerk` | Authentication | `services/user.service.ts`, `proxy.ts` |
+| `clerk` | Authentication | `services/user.service.ts` (server-side only), `proxy.ts` |
 | `neon-drizzle` | Database | `lib/db/client.ts`, `services/database.service.ts` |
 | `ai-sdk` | AI (OpenAI/Anthropic/Google) | `services/ai.service.ts` |
 | `resend` | Email | `services/email.service.ts`, `components/emails/` |
@@ -78,8 +81,8 @@ Generated projects use Next.js default structure (no `--src-dir` flag).
 | `inngest` | Background Jobs | `lib/inngest.client.ts`, `services/jobs.service.ts` |
 | `uploadthing` | File Uploads | `lib/uploadthing.client.ts`, `services/file.service.ts` |
 | `stripe` | Payments | `services/payment.service.ts`, webhook routes |
-| `posthog` | Analytics | `instrumentation-client.ts`, `services/analytics.service.ts` |
-| `sentry` | Error Tracking | `instrumentation.ts`, `instrumentation-client.ts`, `sentry.*.config.ts` |
+| `posthog` | Analytics | `instrumentation-client.ts` (use `posthog` directly in clients) |
+| `sentry` | Error Tracking | `instrumentation.ts`, `instrumentation-client.ts` (use `Sentry` directly) |
 
 ## Adding New Integrations
 
