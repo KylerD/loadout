@@ -1,15 +1,14 @@
 <div align="center">
 
 ```
-  _    ___   _   ___   ___  _   _ _____
- | |  / _ \ /_\ |   \ / _ \| | | |_   _|
- | |_| (_) / _ \| |) | (_) | |_| | | |
- |____\___/_/ \_\___/ \___/ \___/  |_|
+  _                 _          _   
+ | |   ___  __ _ __| |___ _  _| |_ 
+ | |__/ _ \/ _` / _` / _ \ || |  _|
+ |____\___/\__,_\__,_\___/\_,_|\__|
+                                   
 ```
 
-**Stop copy-pasting boilerplate. Start building.**
-
-**One command to scaffold a production-ready Next.js app with the integrations you actually need.**
+**An opinionated Next.js scaffold with the integrations you probably need.**
 
 [![npm version](https://img.shields.io/npm/v/create-loadout?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/create-loadout)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
