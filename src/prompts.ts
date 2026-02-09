@@ -1,6 +1,11 @@
 import { input, confirm, select } from '@inquirer/prompts';
 import type { IntegrationId, ProjectConfig, AIProviderChoice } from './types.js';
 
+export interface AddIntegrationConfig {
+  integrations: IntegrationId[];
+  aiProvider?: AIProviderChoice;
+}
+
 export async function getProjectConfig(): Promise<ProjectConfig> {
   const name = await input({
     message: 'Project name:',
@@ -76,4 +81,44 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
   }
 
   return { name, integrations, aiProvider };
+}
+
+const integrationPrompts: Record<IntegrationId, string> = {
+  clerk: 'Add Clerk for authentication?',
+  'neon-drizzle': 'Add Neon + Drizzle for database?',
+  'ai-sdk': 'Add Vercel AI SDK?',
+  resend: 'Add Resend for email?',
+  firecrawl: 'Add Firecrawl for web scraping?',
+  inngest: 'Add Inngest for background jobs?',
+  uploadthing: 'Add UploadThing for file uploads?',
+  stripe: 'Add Stripe for payments?',
+  posthog: 'Add PostHog for analytics?',
+  sentry: 'Add Sentry for error tracking?',
+};
+
+export async function getAddIntegrationConfig(
+  available: IntegrationId[]
+): Promise<AddIntegrationConfig> {
+  const integrations: IntegrationId[] = [];
+  let aiProvider: AIProviderChoice | undefined;
+
+  for (const id of available) {
+    const message = integrationPrompts[id];
+    if (await confirm({ message, default: false })) {
+      integrations.push(id);
+
+      if (id === 'ai-sdk') {
+        aiProvider = await select({
+          message: 'Which AI provider?',
+          choices: [
+            { value: 'openai' as const, name: 'OpenAI (GPT-4o)' },
+            { value: 'anthropic' as const, name: 'Anthropic (Claude)' },
+            { value: 'google' as const, name: 'Google (Gemini)' },
+          ],
+        });
+      }
+    }
+  }
+
+  return { integrations, aiProvider };
 }

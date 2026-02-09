@@ -500,3 +500,35 @@ if (!user) {
 
   await fs.writeFile(path.join(projectPath, 'CLAUDE.md'), content);
 }
+
+export async function appendClaudeMd(
+  projectPath: string,
+  integrations: IntegrationId[]
+): Promise<void> {
+  const claudeMdPath = path.join(projectPath, 'CLAUDE.md');
+
+  let existing = '';
+  try {
+    existing = await fs.readFile(claudeMdPath, 'utf-8');
+  } catch {
+    return;
+  }
+
+  const newSections = stackSections.filter((section) =>
+    integrations.includes(section.id as IntegrationId)
+  );
+
+  if (newSections.length === 0) return;
+
+  let content = '\n## Added Integrations\n\n';
+
+  for (const section of newSections) {
+    content += `### ${section.name}\n`;
+    for (const item of section.items) {
+      content += `- [${item.name}](${item.url}) - ${item.description}\n`;
+    }
+    content += '\n';
+  }
+
+  await fs.writeFile(claudeMdPath, existing.trimEnd() + '\n' + content);
+}

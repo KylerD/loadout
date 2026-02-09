@@ -83,3 +83,39 @@ export async function generateConfig(
   await fs.mkdir(path.join(projectPath, 'lib'), { recursive: true });
   await fs.writeFile(path.join(projectPath, 'lib/config.ts'), content.trim() + '\n');
 }
+
+export async function appendConfig(
+  projectPath: string,
+  integrations: IntegrationId[],
+  aiProvider?: AIProviderChoice
+): Promise<void> {
+  const configPath = path.join(projectPath, 'lib/config.ts');
+
+  let existing = '';
+  try {
+    existing = await fs.readFile(configPath, 'utf-8');
+  } catch {
+    existing = '';
+  }
+
+  let content = '';
+
+  for (const id of integrations) {
+    const vars = getConfigVars(id, aiProvider);
+    if (!vars || vars.length === 0) continue;
+
+    for (const v of vars) {
+      if (v.defaultValue) {
+        content += `export const ${v.name} = process.env.${v.envKey} ?? '${v.defaultValue}';\n`;
+      } else {
+        content += `export const ${v.name} = process.env.${v.envKey} as string;\n`;
+      }
+    }
+    content += '\n';
+  }
+
+  if (content) {
+    const newContent = existing.trimEnd() + '\n\n' + content.trim() + '\n';
+    await fs.writeFile(configPath, newContent);
+  }
+}

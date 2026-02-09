@@ -174,3 +174,39 @@ export async function generateEnvFiles(
     );
   }
 }
+
+export async function appendEnvFiles(
+  projectPath: string,
+  integrations: IntegrationId[],
+  aiProvider?: AIProviderChoice
+): Promise<void> {
+  const envExamplePath = path.join(projectPath, '.env.example');
+  const envLocalPath = path.join(projectPath, '.env.local');
+
+  let envExampleContent = '';
+  let envLocalContent = '';
+
+  for (const id of integrations) {
+    const section = getEnvSection(id, aiProvider);
+    envExampleContent += '\n' + generateEnvSection(section, true);
+    envLocalContent += '\n' + generateEnvSection(section, false);
+  }
+
+  if (envExampleContent) {
+    try {
+      const existing = await fs.readFile(envExamplePath, 'utf-8');
+      await fs.writeFile(envExamplePath, existing.trimEnd() + '\n' + envExampleContent.trim() + '\n');
+    } catch {
+      await fs.writeFile(envExamplePath, envExampleContent.trim() + '\n');
+    }
+  }
+
+  if (envLocalContent) {
+    try {
+      const existing = await fs.readFile(envLocalPath, 'utf-8');
+      await fs.writeFile(envLocalPath, existing.trimEnd() + '\n' + envLocalContent.trim() + '\n');
+    } catch {
+      await fs.writeFile(envLocalPath, envLocalContent.trim() + '\n');
+    }
+  }
+}
