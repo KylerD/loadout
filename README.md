@@ -1,16 +1,20 @@
 <div align="center">
 
-```
-  _                 _          _   
- | |   ___  __ _ __| |___ _  _| |_ 
+```txt
+  _                 _          _
+ | |   ___  __ _ __| |___ _  _| |_
  | |__/ _ \/ _` / _` / _ \ || |  _|
  |____\___/\__,_\__,_\___/\_,_|\__|
-                                   
+
 ```
+
+**Stop copy-pasting boilerplate. Start building.**
 
 **An opinionated Next.js scaffold with the integrations you probably need.**
 
 [![npm version](https://img.shields.io/npm/v/create-loadout?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/create-loadout)
+[![npm downloads](https://img.shields.io/npm/dm/create-loadout?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/create-loadout)
+[![GitHub stars](https://img.shields.io/github/stars/KylerD/loadout?style=for-the-badge&logo=github&color=181717)](https://github.com/KylerD/loadout)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 
 ```bash
@@ -45,7 +49,7 @@ your-app/
 ├── components/             # React components + shadcn/ui
 ├── actions/                # Server actions
 ├── services/               # Business logic (DI-ready)
-├── dao/                    # Data access layer
+├── dao/                    # Data access layer (Drizzle ORM)
 ├── models/                 # DTOs, views, schemas, state
 ├── lib/
 │   ├── config.ts           # Type-safe env vars
@@ -56,6 +60,7 @@ your-app/
 ```
 
 **Every integration follows the same pattern:**
+
 - Services for business logic
 - Type-safe configuration
 - Ready-to-use API routes where needed
@@ -65,20 +70,20 @@ your-app/
 
 ## Available Integrations
 
-| | Integration | What You Get |
-|:--:|-------------|--------------|
-| 🔐 | **Clerk** | Auth, user service, route protection via `proxy.ts` |
-| 🗄️ | **Neon + Drizzle** | Serverless Postgres with full CRUD example (todos) |
-| 🤖 | **AI SDK** | OpenAI / Anthropic / Google with `generateObject` patterns |
-| 📧 | **Resend** | Email service + React email templates |
-| 🔥 | **Firecrawl** | Web scraping service + API route |
-| ⏰ | **Inngest** | Background jobs with typed functions |
-| 📁 | **UploadThing** | File uploads with React components |
-| 💳 | **Stripe** | Checkout, webhooks, customer portal |
-| 📊 | **PostHog** | Analytics via `instrumentation-client.ts` |
-| 🐛 | **Sentry** | Error tracking (server + client + edge) |
+|     | Integration        | What You Get                               |
+| :-: | ------------------ | ------------------------------------------ |
+| 🔐  | **Clerk**          | Authentication + user service              |
+| 🗄️  | **Neon + Drizzle** | Serverless Postgres with full CRUD example |
+| 🤖  | **AI SDK**         | OpenAI / Anthropic / Google                |
+| 📧  | **Resend**         | Email service + React email templates      |
+| 🔥  | **Firecrawl**      | Web scraping service                       |
+| ⏰  | **Inngest**        | Background jobs                            |
+| 📁  | **UploadThing**    | File uploads                               |
+| 💳  | **Stripe**         | Checkout, webhooks, customer portal        |
+| 📊  | **PostHog**        | Product analytics                          |
+| 🐛  | **Sentry**         | Error tracking                             |
 
-**Always included:** TypeScript, Tailwind, shadcn/ui, Zod v4, Zustand, ESLint
+**Always included:** TypeScript, Tailwind, shadcn/ui, Zod, Zustand, Luxon
 
 ---
 
@@ -104,13 +109,13 @@ npm install
 npm run dev
 ```
 
-That's it. Your `.env.example` has setup URLs for each service. Fill in `.env.local` and you're live.
+That's it. Fill in `.env.local` and you're live.
 
 ---
 
 ## Architecture
 
-Generated projects follow a **layered architecture** that scales:
+Generated projects follow a **layered architecture**:
 
 ```
 UI Components (app/, components/)
@@ -119,54 +124,25 @@ Server Actions (actions/*.actions.ts)
         ↓
 Services (services/*.service.ts)
         ↓
-DAOs (dao/*.dao.ts)
+DAOs (dao/*.dao.ts + Drizzle ORM)
         ↓
-Database (Drizzle ORM)
+Neon (Serverless Postgres)
 ```
 
-**Why this matters:**
-- **Testable** — Services can be unit tested without UI
-- **Swappable** — Change your database without touching business logic
-- **AI-friendly** — Clear boundaries help AI assistants understand your code
-
 Services use constructor-based dependency injection with singleton exports — optimized for Next.js serverless.
-
----
-
-## Modern Defaults
-
-Loadout stays current with Next.js best practices:
-
-| Pattern | What We Use |
-|---------|-------------|
-| Route protection | `proxy.ts` (Next.js 16+) |
-| Client-side init | `instrumentation-client.ts` (Next.js 15.3+) |
-| Server instrumentation | `instrumentation.ts` (Next.js 15+) |
-| Validation | Zod v4 (`z.email()` not `z.string().email()`) |
-| Auth UI | Clerk modal mode (SignInButton/SignUpButton) |
-| AI patterns | `generateObject` with Zod schemas |
-
-No deprecated patterns. No legacy workarounds.
 
 ---
 
 ## Development
 
 ```bash
-# Clone
 git clone https://github.com/KylerD/loadout.git
 cd loadout
-
-# Install
 npm install
-
-# Run in dev mode
 npm run dev
 
-# Build
+# Build and test locally
 npm run build
-
-# Test locally
 npm link
 create-loadout
 ```
@@ -176,4 +152,3 @@ create-loadout
 ## License
 
 MIT
-
