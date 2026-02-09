@@ -1,5 +1,4 @@
 export const stripeTemplates = {
-  // Payment service with constructor-based DI
   paymentService: `import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '@/lib/config';
 
@@ -27,9 +26,6 @@ export class PaymentService {
     });
   }
 
-  /**
-   * Create a Stripe Checkout session
-   */
   async createCheckoutSession(options: CreateCheckoutOptions): Promise<Stripe.Checkout.Session> {
     return this.stripe.checkout.sessions.create({
       mode: options.mode ?? 'subscription',
@@ -47,9 +43,6 @@ export class PaymentService {
     });
   }
 
-  /**
-   * Create a customer portal session
-   */
   async createPortalSession(options: CreatePortalOptions): Promise<Stripe.BillingPortal.Session> {
     return this.stripe.billingPortal.sessions.create({
       customer: options.customerId,
@@ -57,30 +50,18 @@ export class PaymentService {
     });
   }
 
-  /**
-   * Get a subscription by ID
-   */
   async getSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
     return this.stripe.subscriptions.retrieve(subscriptionId);
   }
 
-  /**
-   * Cancel a subscription
-   */
   async cancelSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
     return this.stripe.subscriptions.cancel(subscriptionId);
   }
 
-  /**
-   * Get a customer by ID
-   */
   async getCustomer(customerId: string): Promise<Stripe.Customer | Stripe.DeletedCustomer> {
     return this.stripe.customers.retrieve(customerId);
   }
 
-  /**
-   * Create a new customer
-   */
   async createCustomer(email: string, metadata?: Record<string, string>): Promise<Stripe.Customer> {
     return this.stripe.customers.create({
       email,
@@ -88,9 +69,6 @@ export class PaymentService {
     });
   }
 
-  /**
-   * Construct and validate a webhook event
-   */
   constructWebhookEvent(
     payload: string | Buffer,
     signature: string,
@@ -100,33 +78,32 @@ export class PaymentService {
   }
 }
 
-// Export singleton instance
 export const paymentService = new PaymentService(STRIPE_SECRET_KEY);
 
-// Re-export Stripe types for convenience
 export type { Stripe };
 `,
 
   checkoutRoute: `import { NextResponse } from 'next/server';
 import { paymentService } from '@/services/payment.service';
-import { APP_URL } from '@/lib/config';
 import { z } from 'zod';
 
 const checkoutSchema = z.object({
   priceId: z.string(),
   customerId: z.string().optional(),
+  successUrl: z.url(),
+  cancelUrl: z.url(),
 });
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { priceId, customerId } = checkoutSchema.parse(body);
+    const { priceId, customerId, successUrl, cancelUrl } = checkoutSchema.parse(body);
 
     const session = await paymentService.createCheckoutSession({
       priceId,
       customerId,
-      successUrl: \`\${APP_URL}/success?session_id={CHECKOUT_SESSION_ID}\`,
-      cancelUrl: \`\${APP_URL}/pricing\`,
+      successUrl,
+      cancelUrl,
     });
 
     return NextResponse.json({ url: session.url });
@@ -164,12 +141,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  // Handle the event
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       console.log('Checkout completed:', session.id);
-      // TODO: Fulfill the order, update database, etc.
       break;
     }
 
@@ -177,14 +152,12 @@ export async function POST(req: Request) {
     case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription;
       console.log('Subscription updated:', subscription.id, subscription.status);
-      // TODO: Update user subscription status in database
       break;
     }
 
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription;
       console.log('Subscription cancelled:', subscription.id);
-      // TODO: Handle subscription cancellation
       break;
     }
 
@@ -197,7 +170,6 @@ export async function POST(req: Request) {
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice;
       console.log('Payment failed:', invoice.id);
-      // TODO: Notify user of failed payment
       break;
     }
 
@@ -211,21 +183,21 @@ export async function POST(req: Request) {
 
   portalRoute: `import { NextResponse } from 'next/server';
 import { paymentService } from '@/services/payment.service';
-import { APP_URL } from '@/lib/config';
 import { z } from 'zod';
 
 const portalSchema = z.object({
   customerId: z.string(),
+  returnUrl: z.url(),
 });
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { customerId } = portalSchema.parse(body);
+    const { customerId, returnUrl } = portalSchema.parse(body);
 
     const session = await paymentService.createPortalSession({
       customerId,
-      returnUrl: \`\${APP_URL}/account\`,
+      returnUrl,
     });
 
     return NextResponse.json({ url: session.url });

@@ -1,5 +1,4 @@
 export const resendTemplates = {
-  // Email service with constructor-based DI
   emailService: `import { Resend } from 'resend';
 import type { ReactElement } from 'react';
 import { RESEND_API_KEY, RESEND_FROM_EMAIL } from '@/lib/config';
@@ -21,9 +20,6 @@ export class EmailService {
     this.defaultFrom = defaultFrom;
   }
 
-  /**
-   * Send an email using a React component template
-   */
   async send(options: SendEmailOptions) {
     const { data, error } = await this.resend.emails.send({
       from: options.from || this.defaultFrom,
@@ -40,9 +36,6 @@ export class EmailService {
     return data;
   }
 
-  /**
-   * Send a welcome email to a new user
-   */
   async sendWelcome(to: string, name: string) {
     const { WelcomeEmail } = await import('@/components/emails/welcome');
     return this.send({
@@ -53,7 +46,6 @@ export class EmailService {
   }
 }
 
-// Export singleton instance
 export const emailService = new EmailService(RESEND_API_KEY, RESEND_FROM_EMAIL);
 `,
 

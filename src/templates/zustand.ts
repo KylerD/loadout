@@ -1,5 +1,4 @@
 export const zustandTemplates = {
-  // Example counter store demonstrating the pattern
   exampleStore: `import { createStore, useStore } from 'zustand';
 
 interface CounterState {

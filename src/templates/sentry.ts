@@ -1,5 +1,4 @@
 export const sentryTemplates = {
-  // instrumentation.ts - registers Sentry for server/edge (Next.js 15+)
   instrumentation: `import * as Sentry from '@sentry/nextjs';
 
 export async function register() {
@@ -15,8 +14,6 @@ export async function register() {
 export const onRequestError = Sentry.captureRequestError;
 `,
 
-  // instrumentation-client.ts - client-side Sentry init (Next.js 15.3+)
-  // Client components can then just: import * as Sentry from '@sentry/nextjs'
   instrumentationClient: `import * as Sentry from '@sentry/nextjs';
 import { SENTRY_DSN } from '@/lib/config';
 
@@ -127,7 +124,6 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        {/* NextError requires statusCode but App Router doesn't expose it, so we pass 0 */}
         <NextError statusCode={0} />
       </body>
     </html>

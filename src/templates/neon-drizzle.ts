@@ -40,7 +40,6 @@ export const todos = pgTable('todos', {
 export * from './schema';
 `,
 
-  // models/todo.dto.ts
   todoDto: `import { todos } from '@/lib/db/schema';
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 
@@ -48,7 +47,6 @@ export type TodoInsertDto = InferInsertModel<typeof todos>;
 export type TodoDto = InferSelectModel<typeof todos>;
 `,
 
-  // models/todo.view.ts
   todoView: `export type TodoView = {
   id: string;
   title: string;
@@ -58,7 +56,6 @@ export type TodoDto = InferSelectModel<typeof todos>;
 };
 `,
 
-  // models/todoCreate.schema.ts
   todoCreateSchema: `import { z } from 'zod';
 
 export const TodoCreateFormSchema = z.object({
@@ -75,7 +72,6 @@ export type TodoCreateServiceResult = {
 };
 `,
 
-  // models/todoCreate.state.ts
   todoCreateState: `export type TodoCreateState = {
   success: boolean;
   error: string | null;
@@ -89,7 +85,6 @@ export const initialTodoCreateState: TodoCreateState = {
 };
 `,
 
-  // models/todoUpdate.schema.ts
   todoUpdateSchema: `import { z } from 'zod';
 
 export const TodoUpdateFormSchema = z.object({
@@ -116,7 +111,6 @@ export type TodoUpdateServiceResult = {
 };
 `,
 
-  // models/todoUpdate.state.ts
   todoUpdateState: `export type TodoUpdateState = {
   success: boolean;
   error: string | null;
@@ -130,7 +124,6 @@ export const initialTodoUpdateState: TodoUpdateState = {
 };
 `,
 
-  // dao/todo.dao.ts
   todoDao: `import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { todos } from '@/lib/db/schema';
@@ -171,7 +164,6 @@ export class TodoDAO {
 export const todoDAO = new TodoDAO();
 `,
 
-  // mappers/todo.mapper.ts
   todoMapper: `import type { TodoDto, TodoInsertDto } from '@/models/todo.dto';
 import type { TodoView } from '@/models/todo.view';
 import type { TodoCreateServiceRequest } from '@/models/todoCreate.schema';
@@ -202,7 +194,6 @@ export class TodoMapper {
 export const todoMapper = new TodoMapper();
 `,
 
-  // services/todo.service.ts
   todoService: `import { todoDAO, type TodoDAO } from '@/dao/todo.dao';
 import { todoMapper, type TodoMapper } from '@/mappers/todo.mapper';
 import type { TodoView } from '@/models/todo.view';
@@ -272,7 +263,6 @@ export class TodoService {
 export const todoService = new TodoService(todoDAO, todoMapper);
 `,
 
-  // actions/todo.actions.ts
   todoActions: `'use server';
 
 import { revalidatePath } from 'next/cache';

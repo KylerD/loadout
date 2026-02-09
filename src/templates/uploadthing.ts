@@ -1,5 +1,4 @@
 export const uploadthingTemplates = {
-  // UploadThing client helpers
   uploadthingClient: `import {
   generateUploadButton,
   generateUploadDropzone,
@@ -13,7 +12,6 @@ export const UploadDropzone = generateUploadDropzone<OurFileRouter>();
 export const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 `,
 
-  // File service with constructor-based DI
   fileService: `import { UTApi } from 'uploadthing/server';
 
 export interface UploadedFile {
@@ -26,37 +24,24 @@ export interface UploadedFile {
 export class FileService {
   constructor(private utapi: UTApi) {}
 
-  /**
-   * Delete a file by its key
-   */
   async deleteFile(key: string): Promise<void> {
     await this.utapi.deleteFiles(key);
   }
 
-  /**
-   * Delete multiple files by their keys
-   */
   async deleteFiles(keys: string[]): Promise<void> {
     await this.utapi.deleteFiles(keys);
   }
 
-  /**
-   * Get file URLs from keys
-   */
   async getFileUrls(keys: string[]): Promise<string[]> {
     const result = await this.utapi.getFileUrls(keys);
     return result.data.map((f) => f.url);
   }
 
-  /**
-   * Rename a file
-   */
   async renameFile(key: string, newName: string): Promise<void> {
     await this.utapi.renameFiles({ fileKey: key, newName });
   }
 }
 
-// Export singleton instance
 export const fileService = new FileService(new UTApi());
 `,
 
@@ -65,7 +50,6 @@ import { UploadThingError } from 'uploadthing/server';
 
 const f = createUploadthing();
 
-// Add your auth logic here
 const auth = (req: Request) => ({ id: 'user-id' });
 
 export const ourFileRouter = {

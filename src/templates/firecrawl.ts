@@ -1,5 +1,4 @@
 export const firecrawlTemplates = {
-  // Scraping service with constructor-based DI
   scrapeService: `import FirecrawlApp from '@mendable/firecrawl-js';
 import { FIRECRAWL_API_KEY } from '@/lib/config';
 
@@ -21,9 +20,6 @@ export class ScrapeService {
     this.client = new FirecrawlApp({ apiKey });
   }
 
-  /**
-   * Scrape a single URL and return markdown/html content
-   */
   async scrapeUrl(url: string): Promise<ScrapeResult> {
     const result = await this.client.scrapeUrl(url, {
       formats: ['markdown', 'html'],
@@ -40,9 +36,6 @@ export class ScrapeService {
     };
   }
 
-  /**
-   * Crawl a website starting from a URL
-   */
   async crawlSite(url: string, options?: { limit?: number }): Promise<CrawlResult> {
     const result = await this.client.crawlUrl(url, {
       limit: options?.limit ?? 10,
@@ -64,9 +57,6 @@ export class ScrapeService {
     };
   }
 
-  /**
-   * Extract structured data from a URL
-   */
   async extractData<T>(url: string, schema: Record<string, unknown>): Promise<T> {
     const result = await this.client.scrapeUrl(url, {
       formats: ['extract'],
@@ -81,7 +71,6 @@ export class ScrapeService {
   }
 }
 
-// Export singleton instance
 export const scrapeService = new ScrapeService(FIRECRAWL_API_KEY);
 `,
 
