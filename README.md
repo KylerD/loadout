@@ -1,188 +1,167 @@
-# create-loadout
+<div align="center">
 
-A custom Next.js scaffolding CLI that wraps `create-next-app` and extends it with optional integrations for common SaaS building blocks.
+```
+  _    ___   _   ___   ___  _   _ _____
+ | |  / _ \ /_\ |   \ / _ \| | | |_   _|
+ | |_| (_) / _ \| |) | (_) | |_| | | |
+ |____\___/_/ \_\___/ \___/ \___/  |_|
+```
 
-## Usage
+**Stop copy-pasting boilerplate. Start building.**
+
+**One command to scaffold a production-ready Next.js app with the integrations you actually need.**
+
+[![npm version](https://img.shields.io/npm/v/create-loadout?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/create-loadout)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 
 ```bash
 npx create-loadout
 ```
 
-Or with npm:
+Works on Mac, Windows, and Linux.
 
-```bash
-npm create loadout
-```
+</div>
 
-## What it does
+---
 
-1. Runs `create-next-app` with recommended defaults:
-   - TypeScript
-   - Tailwind CSS
-   - ESLint
-   - App Router
+## Why I Built This
 
-2. Sets up shadcn/ui with common components
+Every new SaaS project starts the same way. Create the Next.js app. Add Tailwind. Set up shadcn. Copy your auth config from the last project. Wire up the database. Add Stripe. Configure error tracking. Set up analytics.
 
-3. Prompts for optional integrations (10 total)
+It's the same 2-4 hours every time. And every time, you're copy-pasting from old projects, fixing the inevitable drift, and wondering if you remembered everything.
 
-4. Installs selected packages and generates ready-to-use boilerplate
+**Loadout gives you a fully-wired Next.js app in under a minute.**
 
-5. Creates `CLAUDE.md`, `README.md`, `.gitignore`, and `.env.example`
+You pick your integrations. It scaffolds everything — services, API routes, typed env vars, even a `CLAUDE.md` so your AI assistant knows how the project is structured.
 
-## Architecture
+No more boilerplate archaeology. Just start building.
 
-Generated projects follow a **layered architecture** with clear separation of concerns:
+---
+
+## What You Get
 
 ```
-UI Components (app/, components/)
-    ↓
-Server Actions (actions/*.actions.ts)
-    ↓
-Services (services/*.service.ts)
-    ↓
-DAOs (dao/*.dao.ts)
-    ↓
-Database (Drizzle ORM)
-```
-
-### Directory Structure
-
-```
-├── app/                    # Next.js App Router pages and API routes
-├── components/             # React components (including shadcn/ui)
-│   └── emails/             # Email templates (if Resend selected)
-├── actions/                # Server actions (form submissions)
-│   └── *.actions.ts
-├── services/               # Business logic orchestration
-│   └── *.service.ts
-├── dao/                    # Data access objects (database queries)
-│   └── *.dao.ts
-├── mappers/                # Data transformation
-│   └── *.mapper.ts
-├── models/                 # Type definitions
-│   ├── *.dto.ts            # Database types (InferSelectModel)
-│   ├── *.view.ts           # View models for UI
-│   ├── *.schema.ts         # Zod validation + ServiceRequest/Result
-│   └── *.state.ts          # Action state objects
+your-app/
+├── app/                    # Next.js App Router
+├── components/             # React components + shadcn/ui
+├── actions/                # Server actions
+├── services/               # Business logic (DI-ready)
+├── dao/                    # Data access layer
+├── models/                 # DTOs, views, schemas, state
 ├── lib/
-│   ├── config.ts           # Centralized environment variables
-│   └── db/                 # Database client and schema
-└── ...
+│   ├── config.ts           # Type-safe env vars
+│   └── db/                 # Database client + schema
+├── CLAUDE.md               # AI assistant context
+├── .env.example            # Documented env template
+└── .env.local              # Your secrets (gitignored)
 ```
 
-Services use **constructor-based dependency injection** with singleton exports for Next.js serverless compatibility.
+**Every integration follows the same pattern:**
+- Services for business logic
+- Type-safe configuration
+- Ready-to-use API routes where needed
+- Zero magic — just clean, readable code
 
-All environment variables are centralized in `lib/config.ts` for type-safe access:
-```typescript
-export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY as string;
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL as string;
-```
+---
 
 ## Available Integrations
 
-| Integration | Packages | Purpose |
-|-------------|----------|---------|
-| **Clerk** | `@clerk/nextjs` | Authentication and user management |
-| **Neon + Drizzle** | `drizzle-orm`, `@neondatabase/serverless`, `drizzle-kit` | Serverless Postgres with TypeScript ORM |
-| **Vercel AI SDK** | `ai`, `@ai-sdk/openai` or `anthropic` or `google` | AI integration with structured generation |
-| **Resend** | `resend` | Email API |
-| **Firecrawl** | `@mendable/firecrawl-js` | Web scraping |
-| **Inngest** | `inngest` | Background jobs and workflows |
-| **UploadThing** | `uploadthing`, `@uploadthing/react` | File uploads |
-| **Stripe** | `stripe` | Payments and subscriptions |
-| **PostHog** | `posthog-js` | Product analytics |
-| **Sentry** | `@sentry/nextjs` | Error tracking |
+| | Integration | What You Get |
+|:--:|-------------|--------------|
+| 🔐 | **Clerk** | Auth, user service, route protection via `proxy.ts` |
+| 🗄️ | **Neon + Drizzle** | Serverless Postgres with full CRUD example (todos) |
+| 🤖 | **AI SDK** | OpenAI / Anthropic / Google with `generateObject` patterns |
+| 📧 | **Resend** | Email service + React email templates |
+| 🔥 | **Firecrawl** | Web scraping service + API route |
+| ⏰ | **Inngest** | Background jobs with typed functions |
+| 📁 | **UploadThing** | File uploads with React components |
+| 💳 | **Stripe** | Checkout, webhooks, customer portal |
+| 📊 | **PostHog** | Analytics via `instrumentation-client.ts` |
+| 🐛 | **Sentry** | Error tracking (server + client + edge) |
 
-All projects include `zod` for schema validation, `zustand` for client state management, and `shadcn/ui` for components.
+**Always included:** TypeScript, Tailwind, shadcn/ui, Zod v4, Zustand, ESLint
 
-## Generated Files
+---
 
-Each integration generates appropriate files following the layered architecture:
+## How It Works
 
-### Clerk
-- `services/user.service.ts` - Server-side user lookups (getUserById, etc.)
-- `components/auth-buttons.tsx` - SignInButton/SignUpButton components
-- `proxy.ts` - Route protection (Next.js 16+)
-- Client-side: Use Clerk hooks (`useUser()`, `useAuth()`) directly
+### 1. Run the CLI
 
-### Neon + Drizzle
+```bash
+npx create-loadout
+```
 
-Generates a complete Todo example demonstrating the full architecture:
+### 2. Answer the Prompts
 
-- `lib/db/schema.ts` - Database schema with `todos` table
-- `lib/db/client.ts` - Database client
-- `models/todo.dto.ts` - Database types (`TodoDto`, `TodoInsertDto`)
-- `models/todo.view.ts` - View model for UI
-- `models/todoCreate.schema.ts` - Zod schema + service types
-- `models/todoCreate.state.ts` - Action state
-- `dao/todo.dao.ts` - Database queries
-- `mappers/todo.mapper.ts` - DTO ↔ View transformations
-- `services/todo.service.ts` - Business logic
-- `actions/todo.actions.ts` - Server actions
-- `drizzle.config.ts` - Drizzle Kit config
+- Project name
+- Which integrations you need
+- AI provider (if using AI SDK)
 
-### Vercel AI SDK
-- `services/ai.service.ts` - AI operations (generateObject, generateText)
+### 3. Start Building
 
-### Resend
-- `services/email.service.ts` - Email sending operations
-- `components/emails/welcome.tsx` - Example email template
-- `app/api/email/send/route.ts` - Send endpoint
+```bash
+cd your-app
+npm install
+npm run dev
+```
 
-### Firecrawl
-- `services/scrape.service.ts` - Scraping operations (scrapeUrl, crawlSite)
-- `app/api/scrape/route.ts` - Scrape endpoint
+That's it. Your `.env.example` has setup URLs for each service. Fill in `.env.local` and you're live.
 
-### Inngest
-- `lib/inngest.client.ts` - Inngest client
-- `lib/inngest.functions.ts` - Example functions
-- `services/jobs.service.ts` - Job triggering operations
-- `app/api/inngest/route.ts` - Inngest handler
+---
 
-### UploadThing
-- `lib/uploadthing.client.ts` - React helpers
-- `services/file.service.ts` - File operations
-- `app/api/uploadthing/core.ts` - FileRouter
-- `app/api/uploadthing/route.ts` - Route handler
-- `components/upload-button.tsx` - Upload components
+## Architecture
 
-### Stripe
-- `services/payment.service.ts` - Payment operations (checkout, portal, webhooks)
-- `app/api/stripe/checkout/route.ts` - Checkout endpoint
-- `app/api/stripe/webhooks/route.ts` - Webhook handler
-- `app/api/stripe/portal/route.ts` - Customer portal
+Generated projects follow a **layered architecture** that scales:
 
-### PostHog
-- `instrumentation-client.ts` - Lightweight init (Next.js 15.3+)
-- Client-side: Use `posthog` directly (`import posthog from 'posthog-js'`)
+```
+UI Components (app/, components/)
+        ↓
+Server Actions (actions/*.actions.ts)
+        ↓
+Services (services/*.service.ts)
+        ↓
+DAOs (dao/*.dao.ts)
+        ↓
+Database (Drizzle ORM)
+```
 
-### Sentry
-- `instrumentation.ts` - Server/edge registration (Next.js 15+)
-- `instrumentation-client.ts` - Client-side init (Next.js 15.3+)
-- `sentry.server.config.ts` - Server-side config
-- `sentry.edge.config.ts` - Edge config
-- `app/global-error.tsx` - Error boundary
-- Use `Sentry` directly (`import * as Sentry from '@sentry/nextjs'`)
+**Why this matters:**
+- **Testable** — Services can be unit tested without UI
+- **Swappable** — Change your database without touching business logic
+- **AI-friendly** — Clear boundaries help AI assistants understand your code
 
-## Environment Variables
+Services use constructor-based dependency injection with singleton exports — optimized for Next.js serverless.
 
-The CLI generates:
+---
 
-- `.env.example` - Documented template with all variables and setup URLs
-- `.env.local` - Empty file for your actual values (gitignored)
+## Modern Defaults
+
+Loadout stays current with Next.js best practices:
+
+| Pattern | What We Use |
+|---------|-------------|
+| Route protection | `proxy.ts` (Next.js 16+) |
+| Client-side init | `instrumentation-client.ts` (Next.js 15.3+) |
+| Server instrumentation | `instrumentation.ts` (Next.js 15+) |
+| Validation | Zod v4 (`z.email()` not `z.string().email()`) |
+| Auth UI | Clerk modal mode (SignInButton/SignUpButton) |
+| AI patterns | `generateObject` with Zod schemas |
+
+No deprecated patterns. No legacy workarounds.
+
+---
 
 ## Development
 
 ```bash
-# Clone the repo
-git clone https://github.com/your-org/create-loadout.git
-cd create-loadout
+# Clone
+git clone https://github.com/KylerD/loadout.git
+cd loadout
 
-# Install dependencies
+# Install
 npm install
 
-# Run in development mode
+# Run in dev mode
 npm run dev
 
 # Build
@@ -193,6 +172,9 @@ npm link
 create-loadout
 ```
 
+---
+
 ## License
 
 MIT
+

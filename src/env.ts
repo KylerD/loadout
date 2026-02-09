@@ -12,9 +12,7 @@ interface EnvSection {
 const staticEnvSections: Record<Exclude<IntegrationId, 'ai-sdk'> | 'core', EnvSection> = {
   core: {
     name: 'CORE',
-    vars: [
-      { key: 'NEXT_PUBLIC_APP_URL', example: 'http://localhost:3000', description: 'Application URL' },
-    ],
+    vars: [],
   },
   clerk: {
     name: 'CLERK - Authentication',

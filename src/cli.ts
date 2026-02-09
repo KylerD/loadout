@@ -15,6 +15,7 @@ import {
   generateInstrumentation,
 } from './instrumentation.js';
 import { zustandTemplates } from './templates/zustand.js';
+import { generateLandingPage } from './landing-page.js';
 import type { ProjectConfig } from './types.js';
 
 export async function main() {
@@ -75,6 +76,7 @@ export async function main() {
 
     // Generate project files
     spinner.start('Generating project files...');
+    await generateLandingPage(projectPath, config);
     await generateGitignore(projectPath);
     await generateReadme(projectPath, config);
     await generateClaudeMd(projectPath, config);

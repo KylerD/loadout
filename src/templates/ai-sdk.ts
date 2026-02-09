@@ -22,7 +22,7 @@ const providerConfigs: Record<AIProvider, {
     createFn: 'createAnthropic',
     providerType: 'AnthropicProvider',
     configVar: 'ANTHROPIC_API_KEY',
-    defaultModel: 'claude-sonnet-4-20250514',
+    defaultModel: 'claude-sonnet-4-5',
   },
   google: {
     package: '@ai-sdk/google',
@@ -37,7 +37,7 @@ const providerConfigs: Record<AIProvider, {
 export function getAiServiceTemplate(provider: AIProvider): string {
   const config = providerConfigs[provider];
 
-  return `import { generateObject, generateText } from 'ai';
+  return `import { generateText, Output } from 'ai';
 ${config.import}
 import { z } from 'zod';
 import { ${config.configVar} } from '@/lib/config';
@@ -49,40 +49,40 @@ export class AIService {
     this.provider = ${config.createFn}({ apiKey });
   }
 
-  /**
-   * Generate a structured object from a prompt using a Zod schema
-   */
-  async generateObject<T extends z.ZodType>(
-    prompt: string,
-    schema: T,
-    options?: { system?: string; model?: string }
-  ): Promise<z.infer<T>> {
-    const { object } = await generateObject({
-      model: this.provider(options?.model ?? '${config.defaultModel}'),
-      schema,
-      prompt,
-      system: options?.system,
+  async generateObject() {
+    const model = this.provider('${config.defaultModel}');
+
+    const { output } = await generateText({
+      model: model,
+      output: Output.object({
+        schema: z.object({
+          recipe: z.object({
+            name: z.string(),
+            ingredients: z.array(
+              z.object({ name: z.string(), amount: z.string() }),
+            ),
+            steps: z.array(z.string()),
+          }),
+        }),
+      }),
+      prompt: 'Generate a lasagna recipe.',
     });
-    return object;
+
+    return output;
   }
 
-  /**
-   * Generate a text completion
-   */
-  async generateText(
-    prompt: string,
-    options?: { system?: string; model?: string }
-  ): Promise<string> {
+  async generateText() {
+    const model = this.provider('${config.defaultModel}');
+
     const { text } = await generateText({
-      model: this.provider(options?.model ?? '${config.defaultModel}'),
-      prompt,
-      system: options?.system,
+      model: model,
+      prompt: 'Generate a lasagna recipe.',
     });
+
     return text;
   }
 }
 
-// Export singleton instance
 export const aiService = new AIService(${config.configVar});
 `;
 }

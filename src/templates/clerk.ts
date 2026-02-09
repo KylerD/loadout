@@ -1,28 +1,13 @@
 export const clerkTemplates = {
-  // User service - SERVER-SIDE ONLY operations using Clerk Backend API
-  // For client-side auth, use Clerk hooks: useUser(), useAuth(), etc.
-  userService: `import { clerkClient } from '@clerk/nextjs/server';
+  userService: `import { clerkClient, User } from '@clerk/nextjs/server';
 
-/**
- * Server-side user operations using Clerk Backend API
- * For client-side auth state, use Clerk hooks instead:
- * - useUser() for user data
- * - useAuth() for auth state
- * - <SignedIn>, <SignedOut> for conditional rendering
- */
 export class UserService {
-  /**
-   * Get user by ID (server-side only)
-   */
-  async getUserById(userId: string) {
+  async getUserById(userId: string): Promise<User> {
     const client = await clerkClient();
     return client.users.getUser(userId);
   }
 
-  /**
-   * Get user by email (server-side only)
-   */
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<User | null> {
     const client = await clerkClient();
     const users = await client.users.getUserList({
       emailAddress: [email],
@@ -30,24 +15,18 @@ export class UserService {
     return users.data[0] ?? null;
   }
 
-  /**
-   * Update user metadata (server-side only)
-   */
   async updateUserMetadata(
     userId: string,
     metadata: {
       publicMetadata?: Record<string, unknown>;
       privateMetadata?: Record<string, unknown>;
     }
-  ) {
+  ): Promise<User> {
     const client = await clerkClient();
     return client.users.updateUserMetadata(userId, metadata);
   }
 
-  /**
-   * Delete a user (server-side only)
-   */
-  async deleteUser(userId: string) {
+  async deleteUser(userId: string): Promise<User> {
     const client = await clerkClient();
     return client.users.deleteUser(userId);
   }
@@ -57,29 +36,15 @@ export const userService = new UserService();
 `,
 
   // proxy.ts for Next.js 16+
-  proxy: `import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+  proxy: `import { clerkMiddleware } from '@clerk/nextjs/server';
 
-// Public routes that don't require authentication
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/privacy',
-  '/terms',
-]);
-
-// Webhook routes that bypass auth
-const isWebhookRoute = createRouteMatcher([
-  '/api/webhooks(.*)',
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req) && !isWebhookRoute(req)) {
-    await auth.protect();
-  }
-});
+export default clerkMiddleware();
 
 export const config = {
   matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };

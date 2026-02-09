@@ -66,14 +66,7 @@ export async function installIntegrations(
 }
 
 export function getEnvVars(config: ProjectConfig): EnvVar[] {
-  const envVars: EnvVar[] = [
-    {
-      key: 'NEXT_PUBLIC_APP_URL',
-      description: 'Application URL',
-      example: 'http://localhost:3000',
-      isPublic: true,
-    },
-  ];
+  const envVars: EnvVar[] = [];
 
   for (const id of config.integrations) {
     const integration = getIntegration(id, config);

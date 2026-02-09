@@ -394,14 +394,27 @@ export const useFormStore = <T>(selector: (state: FormState) => T): T => {
 
 ### Usage in Components
 
-\`\`\`typescript
+\`\`\`tsx
 'use client';
 
-function MyForm() {
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+function TitleStep() {
   const title = useFormStore((state) => state.title);
   const setTitle = useFormStore((state) => state.setTitle);
 
-  return <input value={title} onChange={(e) => setTitle(e.target.value)} />;
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="title">Title</Label>
+      <Input
+        id="title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Enter a title"
+      />
+    </div>
+  );
 }
 \`\`\`
 

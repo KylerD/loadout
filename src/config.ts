@@ -11,9 +11,7 @@ interface ConfigVar {
 }
 
 const staticConfigVars: Record<Exclude<IntegrationId, 'ai-sdk'> | 'core', ConfigVar[]> = {
-  core: [
-    { name: 'APP_URL', envKey: 'NEXT_PUBLIC_APP_URL', isPublic: true },
-  ],
+  core: [],
   clerk: [
     { name: 'CLERK_PUBLISHABLE_KEY', envKey: 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', isPublic: true },
     { name: 'CLERK_SECRET_KEY', envKey: 'CLERK_SECRET_KEY', isPublic: false },
@@ -66,18 +64,11 @@ export async function generateConfig(
 ): Promise<void> {
   const selectedIds: (IntegrationId | 'core')[] = ['core', ...config.integrations];
 
-  let content = `// Environment configuration
-// All environment variables are exported from here for type-safe access
-// Update .env.local with your actual values
-
-`;
+  let content = '';
 
   for (const id of selectedIds) {
     const vars = getConfigVars(id, config.aiProvider);
     if (!vars || vars.length === 0) continue;
-
-    const sectionName = id === 'core' ? 'Core' : id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, ' ');
-    content += `// ${sectionName}\n`;
 
     for (const v of vars) {
       if (v.defaultValue) {
