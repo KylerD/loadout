@@ -39,11 +39,15 @@ export async function main() {
     await setupShadcn(projectPath);
     spinner.succeed('shadcn/ui configured');
 
+    // Extend lib/utils.ts with Luxon helpers and debounce
+    await extendUtils(projectPath);
+
     // Install base packages (always included)
     spinner.start('Installing base packages...');
     const { execa } = await import('execa');
-    await execa('npm', ['install', 'zod@^3.24', 'zustand@^5'], { cwd: projectPath });
-    spinner.succeed('Base packages installed (zod, zustand)');
+    await execa('npm', ['install', 'zod@^3.24', 'zustand@^5', 'luxon@^3'], { cwd: projectPath });
+    await execa('npm', ['install', '-D', '@types/luxon'], { cwd: projectPath });
+    spinner.succeed('Base packages installed (zod, zustand, luxon)');
 
     // Create example Zustand store
     await fs.mkdir(path.join(projectPath, 'lib/stores'), { recursive: true });
@@ -113,4 +117,36 @@ export async function main() {
     console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
     process.exit(1);
   }
+}
+
+async function extendUtils(projectPath: string): Promise<void> {
+  const utilsPath = path.join(projectPath, 'lib/utils.ts');
+  const existingContent = await fs.readFile(utilsPath, 'utf-8');
+
+  const additionalUtils = `
+import { DateTime } from 'luxon';
+
+export function formatDate(date: Date | string, format = 'LLL d, yyyy'): string {
+  const dt = typeof date === 'string' ? DateTime.fromISO(date) : DateTime.fromJSDate(date);
+  return dt.toFormat(format);
+}
+
+export function formatRelative(date: Date | string): string {
+  const dt = typeof date === 'string' ? DateTime.fromISO(date) : DateTime.fromJSDate(date);
+  return dt.toRelative() ?? dt.toFormat('LLL d, yyyy');
+}
+
+export function debounce<P extends unknown[], R>(
+  func: (...args: P) => R,
+  wait: number
+): (...args: P) => void {
+  let timeout: ReturnType<typeof setTimeout>;
+  return (...args: P) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+`;
+
+  await fs.writeFile(utilsPath, existingContent + additionalUtils);
 }

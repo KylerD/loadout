@@ -19,6 +19,7 @@ const stackSections: StackSection[] = [
       { name: 'shadcn/ui', url: 'https://ui.shadcn.com/docs', description: 'UI components' },
       { name: 'Zod', url: 'https://zod.dev/', description: 'Schema validation' },
       { name: 'Zustand', url: 'https://zustand.docs.pmnd.rs/', description: 'Client state management' },
+      { name: 'Luxon', url: 'https://moment.github.io/luxon/', description: 'Date/time manipulation' },
     ],
   },
   {
@@ -190,7 +191,8 @@ npm run inngest:dev  # Start Inngest dev server for local testing
 │   ├── *.dto.ts            # Database types (InferSelectModel)
 │   ├── *.view.ts           # View models for UI
 │   ├── *.schema.ts         # Zod validation + ServiceRequest/Result
-│   └── *.state.ts          # Action state objects
+│   ├── *.state.ts          # Action state objects
+│   └── *ServiceError.enum.ts  # Service error enums
 `;
   } else {
     content += `├── services/               # Business logic services
@@ -248,6 +250,21 @@ Files in \`models/\` follow strict naming:
 | \`*.view.ts\` | View models for UI | \`UserView\` |
 | \`*.schema.ts\` | Zod schemas + service types | \`UserCreateFormSchema\`, \`UserCreateServiceRequest\` |
 | \`*.state.ts\` | Action state objects | \`UserCreateState\` |
+| \`*ServiceError.enum.ts\` | Service error enums | \`UserServiceError\` |
+
+### Action File Organization
+
+One action file per domain entity: \`actions/{entity}.action.ts\`. Do NOT split by operation type.
+
+\`\`\`
+actions/
+  project.action.ts   # createProject, updateProject, deleteProject, searchProjects
+  task.action.ts      # createTask, updateTask, deleteTask, searchTasks
+  comment.action.ts   # createComment, deleteComment
+  settings.action.ts  # updateSettings
+\`\`\`
+
+Do NOT create separate files like \`project.create.action.ts\` or \`task.search.action.ts\`.
 
 ### Server Action Pattern
 
@@ -297,6 +314,43 @@ export class EntityDAO {
 }
 
 export const entityDAO = new EntityDAO();
+\`\`\`
+
+### Service Error Enums
+
+Each service class has a corresponding error enum in \`models/{serviceName}ServiceError.enum.ts\`. Services throw errors using enum values, actions catch and translate to user-friendly messages.
+
+\`\`\`typescript
+// models/performanceServiceError.enum.ts
+export enum PerformanceServiceError {
+  NotFound = "PERFORMANCE_NOT_FOUND",
+  NotOwned = "PERFORMANCE_NOT_OWNED",
+  DuplicateTime = "PERFORMANCE_DUPLICATE_TIME",
+}
+
+// services/performance.service.ts
+import { PerformanceServiceError } from "@/models/performanceServiceError.enum";
+
+if (conflict) {
+  throw new Error(PerformanceServiceError.DuplicateTime);
+}
+
+// actions/performance.action.ts
+import { PerformanceServiceError } from "@/models/performanceServiceError.enum";
+
+catch (error) {
+  if (error instanceof Error) {
+    switch (error.message) {
+      case PerformanceServiceError.DuplicateTime:
+        return { success: false, error: 'A performance already exists at this time', data: null };
+      case PerformanceServiceError.NotFound:
+        return { success: false, error: 'Performance not found', data: null };
+      case PerformanceServiceError.NotOwned:
+        return { success: false, error: 'You do not have permission to modify this performance', data: null };
+    }
+  }
+  return { success: false, error: 'Failed to update performance', data: null };
+}
 \`\`\`
 `;
   }
@@ -373,6 +427,27 @@ items.filter((item) => item.isActive)
 // ❌ Wrong
 users.map((u) => u.email)
 items.filter((i) => i.isActive)
+\`\`\`
+
+## Utility Functions
+
+Import from \`@/lib/utils\`:
+
+\`\`\`typescript
+import { cn, formatDate, formatRelative, debounce } from '@/lib/utils';
+
+// Class name merging (shadcn/ui)
+cn('text-sm', isActive && 'text-blue-500')
+
+// Date formatting with Luxon
+formatDate(new Date())                    // "Jan 15, 2024"
+formatDate('2024-01-15', 'yyyy-MM-dd')   // "2024-01-15"
+formatRelative(new Date())                // "2 hours ago"
+
+// Debounce function calls
+const debouncedSearch = debounce((query: string) => {
+  // search logic
+}, 300);
 \`\`\`
 
 ## Environment Variables
