@@ -1,6 +1,6 @@
 {
   "name": "create-loadout",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Custom Next.js scaffolding CLI with optional SaaS integrations",
   "type": "module",
   "bin": {
