@@ -76,6 +76,7 @@ your-app/
 | 🗄️  | **Neon + Drizzle** | Serverless Postgres with full CRUD example |
 | 🤖  | **AI SDK**         | OpenAI / Anthropic / Google                |
 | 📧  | **Resend**         | Email service + React email templates      |
+| 📬  | **Postmark**       | Transactional email with top deliverability |
 | 🔥  | **Firecrawl**      | Web scraping service                       |
 | ⏰  | **Inngest**        | Background jobs                            |
 | 📁  | **UploadThing**    | File uploads                               |

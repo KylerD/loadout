@@ -77,6 +77,7 @@ Generated projects use Next.js default structure (no `--src-dir` flag).
 | `neon-drizzle` | Database | `lib/db/client.ts`, `services/database.service.ts` |
 | `ai-sdk` | AI (OpenAI/Anthropic/Google) | `services/ai.service.ts` |
 | `resend` | Email | `services/email.service.ts`, `components/emails/` |
+| `postmark` | Email | `services/email.service.ts`, `components/emails/` |
 | `firecrawl` | Scraping | `services/scrape.service.ts` |
 | `inngest` | Background Jobs | `lib/inngest.client.ts`, `services/jobs.service.ts` |
 | `uploadthing` | File Uploads | `lib/uploadthing.client.ts`, `services/file.service.ts` |
