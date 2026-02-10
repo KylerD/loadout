@@ -27,35 +27,10 @@ export const stripeIntegration: Integration = {
     },
   ],
   setup: async (projectPath: string) => {
-    // Create payment service
     await fs.mkdir(path.join(projectPath, 'services'), { recursive: true });
     await fs.writeFile(
       path.join(projectPath, 'services/payment.service.ts'),
       stripeTemplates.paymentService
-    );
-
-    // Create API routes
-    await fs.mkdir(path.join(projectPath, 'app/api/stripe/checkout'), {
-      recursive: true,
-    });
-    await fs.mkdir(path.join(projectPath, 'app/api/stripe/webhooks'), {
-      recursive: true,
-    });
-    await fs.mkdir(path.join(projectPath, 'app/api/stripe/portal'), {
-      recursive: true,
-    });
-
-    await fs.writeFile(
-      path.join(projectPath, 'app/api/stripe/checkout/route.ts'),
-      stripeTemplates.checkoutRoute
-    );
-    await fs.writeFile(
-      path.join(projectPath, 'app/api/stripe/webhooks/route.ts'),
-      stripeTemplates.webhooksRoute
-    );
-    await fs.writeFile(
-      path.join(projectPath, 'app/api/stripe/portal/route.ts'),
-      stripeTemplates.portalRoute
     );
   },
 };

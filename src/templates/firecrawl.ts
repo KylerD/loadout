@@ -79,7 +79,7 @@ import { scrapeService } from '@/services/scrape.service';
 import { z } from 'zod';
 
 const scrapeSchema = z.object({
-  url: z.url(),
+  url: z.string().url(),
 });
 
 export async function POST(req: Request) {
