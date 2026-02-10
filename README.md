@@ -80,7 +80,7 @@ your-app/
 | 🔥  | **Firecrawl**      | Web scraping service                       |
 | ⏰  | **Inngest**        | Background jobs                            |
 | 📁  | **UploadThing**    | File uploads                               |
-| 💳  | **Stripe**         | Checkout, webhooks, customer portal        |
+| 💳  | **Stripe**         | Payment service with checkout + billing    |
 | 📊  | **PostHog**        | Product analytics                          |
 | 🐛  | **Sentry**         | Error tracking                             |
 
@@ -90,27 +90,94 @@ your-app/
 
 ## How It Works
 
-### 1. Run the CLI
+### Interactive Mode
 
 ```bash
 npx create-loadout
 ```
 
-### 2. Answer the Prompts
+Answer the prompts — project name, integrations, AI provider — and you're done.
 
-- Project name
-- Which integrations you need
-- AI provider (if using AI SDK)
+### Non-Interactive Mode
 
-### 3. Start Building
+Skip the prompts entirely with CLI flags:
+
+```bash
+npx create-loadout my-app --clerk --neon-drizzle --stripe
+```
+
+All available flags:
+
+```
+--clerk              Clerk authentication
+--neon-drizzle       Neon + Drizzle database
+--ai-sdk             Vercel AI SDK
+--ai-provider <p>    AI provider (openai, anthropic, google)
+--resend             Resend email
+--postmark           Postmark email
+--firecrawl          Firecrawl web scraping
+--inngest            Inngest background jobs
+--uploadthing        UploadThing file uploads
+--stripe             Stripe payments
+--posthog            PostHog analytics
+--sentry             Sentry error tracking
+```
+
+Add integrations to an existing project:
+
+```bash
+npx create-loadout --add --posthog --sentry
+```
+
+Use a config file:
+
+```bash
+npx create-loadout --config loadout.json
+```
+
+```json
+{
+  "name": "my-app",
+  "integrations": ["clerk", "neon-drizzle", "stripe"],
+  "aiProvider": "anthropic"
+}
+```
+
+List all integrations as JSON:
+
+```bash
+npx create-loadout --list
+```
+
+### Start Building
 
 ```bash
 cd your-app
-npm install
 npm run dev
 ```
 
-That's it. Fill in `.env.local` and you're live.
+Fill in `.env.local` and you're live.
+
+---
+
+## MCP Server for Claude Code
+
+Loadout ships an MCP server so Claude Code agents can scaffold and extend projects programmatically.
+
+### Register
+
+```bash
+claude mcp add create-loadout -- npx -y create-loadout-mcp
+```
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `list_integrations` | List all integrations with metadata, env vars, and constraints |
+| `create_project` | Scaffold a new Next.js project with selected integrations |
+| `add_integrations` | Add integrations to an existing project |
+| `detect_project` | Check if a directory is a Next.js project, list installed/available integrations |
 
 ---
 
