@@ -1,5 +1,6 @@
 import { input, confirm, select } from '@inquirer/prompts';
 import type { IntegrationId, ProjectConfig, AIProviderChoice } from './types.js';
+import { validateProjectName } from './validate.js';
 
 export interface AddIntegrationConfig {
   integrations: IntegrationId[];
@@ -11,11 +12,8 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
     message: 'Project name:',
     default: 'my-app',
     validate: (value) => {
-      if (!value.trim()) return 'Project name is required';
-      if (!/^[a-z0-9-]+$/.test(value)) {
-        return 'Project name can only contain lowercase letters, numbers, and hyphens';
-      }
-      return true;
+      const errors = validateProjectName(value);
+      return errors.length > 0 ? errors[0].message : true;
     },
   });
 

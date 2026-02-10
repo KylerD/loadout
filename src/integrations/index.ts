@@ -28,7 +28,7 @@ const staticIntegrations: Partial<Record<IntegrationId, Integration>> = {
 };
 
 // Get integration, with dynamic ones using config
-function getIntegration(id: IntegrationId, config: ProjectConfig): Integration {
+export function getIntegration(id: IntegrationId, config: ProjectConfig): Integration {
   if (id === 'ai-sdk') {
     return createAiSdkIntegration(config.aiProvider ?? 'openai');
   }

@@ -15,7 +15,7 @@ export async function createNextApp(name: string): Promise<string> {
       '--yes',
     ],
     {
-      stdio: 'inherit',
+      stdio: 'pipe',
     }
   );
 
