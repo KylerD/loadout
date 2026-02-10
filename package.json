@@ -21,7 +21,13 @@
     "saas",
     "boilerplate"
   ],
-  "author": "",
+  "author": {
+    "name": "Kyle Davidson"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kylerd/loadout.git"
+  },
   "license": "MIT",
   "dependencies": {
     "@inquirer/prompts": "^7.0.0",

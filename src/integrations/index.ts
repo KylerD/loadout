@@ -9,6 +9,7 @@ import { firecrawlIntegration } from './firecrawl.js';
 import { inngestIntegration } from './inngest.js';
 import { uploadthingIntegration } from './uploadthing.js';
 import { stripeIntegration } from './stripe.js';
+import { postmarkIntegration } from './postmark.js';
 import { posthogIntegration } from './posthog.js';
 import { sentryIntegration } from './sentry.js';
 
@@ -21,6 +22,7 @@ const staticIntegrations: Partial<Record<IntegrationId, Integration>> = {
   inngest: inngestIntegration,
   uploadthing: uploadthingIntegration,
   stripe: stripeIntegration,
+  postmark: postmarkIntegration,
   posthog: posthogIntegration,
   sentry: sentryIntegration,
 };

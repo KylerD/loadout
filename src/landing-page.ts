@@ -22,6 +22,7 @@ const integrationTechnologies: Record<IntegrationId, Technology> = {
   'neon-drizzle': { name: 'Neon + Drizzle', href: 'https://neon.tech/docs', description: 'Serverless Postgres' },
   'ai-sdk': { name: 'AI SDK', href: 'https://sdk.vercel.ai/docs', description: 'AI integration' },
   resend: { name: 'Resend', href: 'https://resend.com/docs', description: 'Email API' },
+  postmark: { name: 'Postmark', href: 'https://postmarkapp.com/developer', description: 'Transactional email' },
   firecrawl: { name: 'Firecrawl', href: 'https://docs.firecrawl.dev', description: 'Web scraping' },
   inngest: { name: 'Inngest', href: 'https://www.inngest.com/docs', description: 'Background jobs' },
   uploadthing: { name: 'UploadThing', href: 'https://docs.uploadthing.com', description: 'File uploads' },

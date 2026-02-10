@@ -23,6 +23,10 @@ const staticConfigVars: Record<Exclude<IntegrationId, 'ai-sdk'> | 'core', Config
     { name: 'RESEND_API_KEY', envKey: 'RESEND_API_KEY', isPublic: false },
     { name: 'RESEND_FROM_EMAIL', envKey: 'RESEND_FROM_EMAIL', isPublic: false, defaultValue: 'onboarding@resend.dev' },
   ],
+  postmark: [
+    { name: 'POSTMARK_SERVER_TOKEN', envKey: 'POSTMARK_SERVER_TOKEN', isPublic: false },
+    { name: 'POSTMARK_FROM_EMAIL', envKey: 'POSTMARK_FROM_EMAIL', isPublic: false },
+  ],
   firecrawl: [
     { name: 'FIRECRAWL_API_KEY', envKey: 'FIRECRAWL_API_KEY', isPublic: false },
   ],

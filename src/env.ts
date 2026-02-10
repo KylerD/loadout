@@ -37,6 +37,14 @@ const staticEnvSections: Record<Exclude<IntegrationId, 'ai-sdk'> | 'core', EnvSe
       { key: 'RESEND_FROM_EMAIL', example: 'onboarding@resend.dev', description: 'Default from email address' },
     ],
   },
+  postmark: {
+    name: 'POSTMARK - Email',
+    url: 'https://account.postmarkapp.com/servers',
+    vars: [
+      { key: 'POSTMARK_SERVER_TOKEN', example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', description: 'Postmark server token' },
+      { key: 'POSTMARK_FROM_EMAIL', example: 'hello@yourdomain.com', description: 'Default from email address' },
+    ],
+  },
   firecrawl: {
     name: 'FIRECRAWL - Scraping',
     url: 'https://firecrawl.dev',

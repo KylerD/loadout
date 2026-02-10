@@ -52,6 +52,13 @@ const stackSections: StackSection[] = [
     ],
   },
   {
+    id: 'postmark',
+    name: 'Email',
+    items: [
+      { name: 'Postmark', url: 'https://postmarkapp.com/developer', description: 'Transactional email' },
+    ],
+  },
+  {
     id: 'firecrawl',
     name: 'Scraping',
     items: [
@@ -164,8 +171,8 @@ npm run inngest:dev  # Start Inngest dev server for local testing
 ├── components/             # React components (including shadcn/ui)
 `;
 
-  if (config.integrations.includes('resend')) {
-    content += `│   └── emails/             # React Email templates
+  if (config.integrations.includes('resend') || config.integrations.includes('postmark')) {
+    content += `│   └── emails/             # Email templates
 `;
   }
 

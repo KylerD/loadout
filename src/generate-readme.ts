@@ -7,6 +7,7 @@ const integrationNames: Record<IntegrationId, string> = {
   'neon-drizzle': 'Neon + Drizzle',
   'ai-sdk': 'Vercel AI SDK',
   resend: 'Resend',
+  postmark: 'Postmark',
   firecrawl: 'Firecrawl',
   inngest: 'Inngest',
   uploadthing: 'UploadThing',
@@ -101,7 +102,7 @@ npm run inngest:dev  # Start Inngest dev server
 ├── services/      # Business logic
 `;
 
-  if (config.integrations.includes('resend')) {
+  if (config.integrations.includes('resend') || config.integrations.includes('postmark')) {
     content += `├── emails/        # Email templates\n`;
   }
 

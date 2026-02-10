@@ -12,6 +12,7 @@ const integrationPackages: Record<IntegrationId, string[]> = {
   'neon-drizzle': ['drizzle-orm', '@neondatabase/serverless'],
   'ai-sdk': ['ai'],
   resend: ['resend'],
+  postmark: ['postmark'],
   firecrawl: ['@mendable/firecrawl-js'],
   inngest: ['inngest'],
   uploadthing: ['uploadthing'],
@@ -61,6 +62,7 @@ export function getAvailableIntegrations(installed: IntegrationId[]): Integratio
     'neon-drizzle',
     'ai-sdk',
     'resend',
+    'postmark',
     'firecrawl',
     'inngest',
     'uploadthing',
@@ -69,5 +71,12 @@ export function getAvailableIntegrations(installed: IntegrationId[]): Integratio
     'sentry',
   ];
 
-  return all.filter((id) => !installed.includes(id));
+  const emailProviders: IntegrationId[] = ['resend', 'postmark'];
+  const hasEmail = emailProviders.some((id) => installed.includes(id));
+
+  return all.filter((id) => {
+    if (installed.includes(id)) return false;
+    if (hasEmail && emailProviders.includes(id)) return false;
+    return true;
+  });
 }

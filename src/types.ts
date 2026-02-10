@@ -7,6 +7,7 @@ export type IntegrationId =
   | 'inngest'
   | 'uploadthing'
   | 'stripe'
+  | 'postmark'
   | 'posthog'
   | 'sentry';
 

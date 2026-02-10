@@ -46,8 +46,15 @@ export async function getProjectConfig(): Promise<ProjectConfig> {
   }
 
   // Email
-  if (await confirm({ message: 'Add Resend for email?', default: false })) {
-    integrations.push('resend');
+  if (await confirm({ message: 'Add email?', default: false })) {
+    const emailProvider = await select({
+      message: 'Which email provider?',
+      choices: [
+        { value: 'resend' as const, name: 'Resend (Modern DX, React Email templates)' },
+        { value: 'postmark' as const, name: 'Postmark (Best-in-class deliverability, fast transactional email)' },
+      ],
+    });
+    integrations.push(emailProvider);
   }
 
   // Scraping
@@ -87,7 +94,8 @@ const integrationPrompts: Record<IntegrationId, string> = {
   clerk: 'Add Clerk for authentication?',
   'neon-drizzle': 'Add Neon + Drizzle for database?',
   'ai-sdk': 'Add Vercel AI SDK?',
-  resend: 'Add Resend for email?',
+  resend: 'Add email?',
+  postmark: 'Add email?',
   firecrawl: 'Add Firecrawl for web scraping?',
   inngest: 'Add Inngest for background jobs?',
   uploadthing: 'Add UploadThing for file uploads?',
@@ -102,7 +110,28 @@ export async function getAddIntegrationConfig(
   const integrations: IntegrationId[] = [];
   let aiProvider: AIProviderChoice | undefined;
 
+  const emailProviders: IntegrationId[] = ['resend', 'postmark'];
+  let emailPromptShown = false;
+
   for (const id of available) {
+    // For email providers, show a single confirm + select prompt
+    if (emailProviders.includes(id)) {
+      if (emailPromptShown) continue;
+      emailPromptShown = true;
+
+      if (await confirm({ message: 'Add email?', default: false })) {
+        const emailProvider = await select({
+          message: 'Which email provider?',
+          choices: [
+            { value: 'resend' as const, name: 'Resend (Modern DX, React Email templates)' },
+            { value: 'postmark' as const, name: 'Postmark (Best-in-class deliverability, fast transactional email)' },
+          ],
+        });
+        integrations.push(emailProvider);
+      }
+      continue;
+    }
+
     const message = integrationPrompts[id];
     if (await confirm({ message, default: false })) {
       integrations.push(id);
