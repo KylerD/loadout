@@ -33,7 +33,7 @@ A Next.js application scaffolded with [create-loadout](https://github.com/your-o
 
 2. Copy the environment file and configure your API keys:
    \`\`\`bash
-   cp .env.example .env.local
+   cp .env.example .env
    \`\`\`
 
 3. Start the development server:
@@ -149,6 +149,9 @@ coverage/
 .idea/
 *.swp
 *.swo
+
+# Claude Code
+.claude/
 
 # OS
 .DS_Store

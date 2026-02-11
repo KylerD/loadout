@@ -157,30 +157,14 @@ export async function generateEnvFiles(
   }
   await fs.writeFile(path.join(projectPath, '.env.example'), envExample.trim() + '\n');
 
-  // Generate .env.local with empty values
-  let envLocal = '';
+  // Generate .env with empty values
+  let env = '';
   for (const id of selectedIds) {
     const section = getEnvSection(id, config.aiProvider);
-    envLocal += generateEnvSection(section, false);
-    envLocal += '\n';
+    env += generateEnvSection(section, false);
+    env += '\n';
   }
-  await fs.writeFile(path.join(projectPath, '.env.local'), envLocal.trim() + '\n');
-
-  // Update .gitignore to include .env.local
-  const gitignorePath = path.join(projectPath, '.gitignore');
-  try {
-    let gitignore = await fs.readFile(gitignorePath, 'utf-8');
-    if (!gitignore.includes('.env.local')) {
-      gitignore += '\n# Environment variables\n.env.local\n.env*.local\n';
-      await fs.writeFile(gitignorePath, gitignore);
-    }
-  } catch {
-    // .gitignore doesn't exist, create it
-    await fs.writeFile(
-      gitignorePath,
-      '# Environment variables\n.env.local\n.env*.local\n'
-    );
-  }
+  await fs.writeFile(path.join(projectPath, '.env'), env.trim() + '\n');
 }
 
 export async function appendEnvFiles(
@@ -189,15 +173,15 @@ export async function appendEnvFiles(
   aiProvider?: AIProviderChoice
 ): Promise<void> {
   const envExamplePath = path.join(projectPath, '.env.example');
-  const envLocalPath = path.join(projectPath, '.env.local');
+  const envPath = path.join(projectPath, '.env');
 
   let envExampleContent = '';
-  let envLocalContent = '';
+  let envContent = '';
 
   for (const id of integrations) {
     const section = getEnvSection(id, aiProvider);
     envExampleContent += '\n' + generateEnvSection(section, true);
-    envLocalContent += '\n' + generateEnvSection(section, false);
+    envContent += '\n' + generateEnvSection(section, false);
   }
 
   if (envExampleContent) {
@@ -209,12 +193,12 @@ export async function appendEnvFiles(
     }
   }
 
-  if (envLocalContent) {
+  if (envContent) {
     try {
-      const existing = await fs.readFile(envLocalPath, 'utf-8');
-      await fs.writeFile(envLocalPath, existing.trimEnd() + '\n' + envLocalContent.trim() + '\n');
+      const existing = await fs.readFile(envPath, 'utf-8');
+      await fs.writeFile(envPath, existing.trimEnd() + '\n' + envContent.trim() + '\n');
     } catch {
-      await fs.writeFile(envLocalPath, envLocalContent.trim() + '\n');
+      await fs.writeFile(envPath, envContent.trim() + '\n');
     }
   }
 }
