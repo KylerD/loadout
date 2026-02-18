@@ -167,7 +167,7 @@ Loadout ships an MCP server so Claude Code agents can scaffold and extend projec
 ### Register
 
 ```bash
-claude mcp add create-loadout -- npx -y create-loadout-mcp
+claude mcp add create-loadout -- npx -y -p create-loadout create-loadout-mcp
 ```
 
 ### Available Tools
