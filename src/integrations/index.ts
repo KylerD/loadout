@@ -1,4 +1,5 @@
 import { execa } from 'execa';
+import { NPM } from '../bin-paths.js';
 import type { Integration, IntegrationId, EnvVar, ProjectConfig } from '../types.js';
 
 import { clerkIntegration } from './clerk.js';
@@ -53,11 +54,11 @@ export async function installIntegrations(
 
   // Install all packages at once
   if (allPackages.length > 0) {
-    await execa('npm', ['install', ...allPackages], { cwd: projectPath });
+    await execa(NPM, ['install', ...allPackages], { cwd: projectPath });
   }
 
   if (allDevPackages.length > 0) {
-    await execa('npm', ['install', '-D', ...allDevPackages], { cwd: projectPath });
+    await execa(NPM, ['install', '-D', ...allDevPackages], { cwd: projectPath });
   }
 
   // Run setup for each integration

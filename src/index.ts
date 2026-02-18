@@ -8,13 +8,17 @@ import { isExistingProject, getInstalledIntegrations, getAvailableIntegrations }
 import type { IntegrationId, AIProviderChoice, ProjectConfig } from './types.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json');
 
 const program = new Command();
 
 program
   .name('create-loadout')
   .description('Custom Next.js scaffolding with SaaS integrations')
-  .version('1.0.1')
+  .version(version)
   .argument('[name]', 'Project name')
   .option('--clerk', 'Add Clerk authentication')
   .option('--neon-drizzle', 'Add Neon + Drizzle database')

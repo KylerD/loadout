@@ -3,11 +3,9 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import path from 'path';
+import { createRequire } from 'module';
 
-const nodeBinDir = path.dirname(process.execPath);
-if (!process.env.PATH?.includes(nodeBinDir)) {
-  process.env.PATH = `${nodeBinDir}:${process.env.PATH || ''}`;
-}
+import './bin-paths.js';
 import { createProject, addIntegrations } from './engine.js';
 import {
   validateProjectConfig,
@@ -23,9 +21,12 @@ import {
 } from './detect.js';
 import type { IntegrationId, AIProviderChoice, ProjectConfig } from './types.js';
 
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json');
+
 const server = new McpServer({
   name: 'create-loadout',
-  version: '1.0.1',
+  version,
 });
 
 // Tool: list_integrations

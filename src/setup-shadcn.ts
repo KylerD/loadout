@@ -1,9 +1,9 @@
 import { execa } from 'execa';
+import { NPX } from './bin-paths.js';
 
 export async function setupShadcn(projectPath: string): Promise<void> {
-  // Initialize shadcn/ui with defaults
   await execa(
-    'npx',
+    NPX,
     [
       'shadcn@latest',
       'init',
@@ -16,9 +16,8 @@ export async function setupShadcn(projectPath: string): Promise<void> {
     }
   );
 
-  // Add commonly used components
   await execa(
-    'npx',
+    NPX,
     [
       'shadcn@latest',
       'add',
