@@ -1,12 +1,11 @@
 <div align="center">
 
-```txt
+<pre>
   _                 _          _
  | |   ___  __ _ __| |___ _  _| |_
  | |__/ _ \/ _` / _` / _ \ || |  _|
  |____\___/\__,_\__,_\___/\_,_|\__|
-
-```
+</pre>
 
 **Stop copy-pasting boilerplate. Start building.**
 
