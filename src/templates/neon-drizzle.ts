@@ -196,7 +196,7 @@ export const todoMapper = new TodoMapper();
 
   todoService: `import { todoDAO, type TodoDAO } from '@/dao/todo.dao';
 import { todoMapper, type TodoMapper } from '@/mappers/todo.mapper';
-import type { TodoView } from '@/models/todo.view';
+import type { TodoDto } from '@/models/todo.dto';
 import type { TodoCreateServiceRequest, TodoCreateServiceResult } from '@/models/todoCreate.schema';
 import type { TodoUpdateServiceRequest, TodoUpdateServiceResult } from '@/models/todoUpdate.schema';
 
@@ -217,14 +217,12 @@ export class TodoService {
     return { todoId: created.id };
   }
 
-  async getTodoById(id: string): Promise<TodoView | null> {
-    const todo = await this.dao.getById(id);
-    return todo ? this.mapper.toView(todo) : null;
+  async getTodoById(id: string): Promise<TodoDto | null> {
+    return (await this.dao.getById(id)) ?? null;
   }
 
-  async getAllTodos(): Promise<TodoView[]> {
-    const todos = await this.dao.getAll();
-    return this.mapper.toViewList(todos);
+  async getAllTodos(): Promise<TodoDto[]> {
+    return await this.dao.getAll();
   }
 
   async updateTodo(request: TodoUpdateServiceRequest): Promise<TodoUpdateServiceResult> {
@@ -241,7 +239,7 @@ export class TodoService {
     return { todoId: updated.id };
   }
 
-  async toggleTodo(id: string): Promise<TodoView> {
+  async toggleTodo(id: string): Promise<TodoDto> {
     const existing = await this.dao.getById(id);
 
     if (!existing) {
@@ -252,7 +250,11 @@ export class TodoService {
       completed: !existing.completed,
     });
 
-    return this.mapper.toView(updated!);
+    if (!updated) {
+      throw new Error('Failed to update todo');
+    }
+
+    return updated;
   }
 
   async deleteTodo(id: string): Promise<void> {

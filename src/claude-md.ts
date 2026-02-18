@@ -359,6 +359,105 @@ catch (error) {
   return { success: false, error: 'Failed to update performance', data: null };
 }
 \`\`\`
+
+### No Rogue Types
+
+Types must come from Zod schemas (\`z.infer<typeof Schema>\`) or \`models/\` files. Do NOT define interfaces in component or action files.
+
+\`\`\`typescript
+// ❌ Wrong - interface defined in component
+interface TodoItem {
+  id: string;
+  title: string;
+}
+
+// ✅ Correct - import from schema or models
+import { type TodoCreatePayload } from "@/models/todoCreate.schema";
+\`\`\`
+
+### Service Request/Result Patterns
+
+**ServiceRequest** - Derive from form schema payload, extend with context:
+
+\`\`\`typescript
+// ✅ Correct - derive from schema, extend with additional fields
+export type TodoCreateServiceRequest = TodoCreateFormPayload & { userId: string };
+
+// ✅ Correct - direct assignment when no additions needed
+export type TodoUpdateServiceRequest = TodoUpdateFormPayload;
+
+// ❌ Wrong - manually retyping all fields
+export type TodoCreateServiceRequest = {
+  title: string;
+  description?: string;
+  userId: string;
+};
+\`\`\`
+
+**ServiceResult** - Only for compound returns (2+ fields). Do NOT wrap single values:
+
+\`\`\`typescript
+// ❌ Wrong - overkill wrapper for single value
+export type TodoCreateServiceResult = { todoId: string };
+
+// ✅ Correct - return directly
+async createTodo(request): Promise<string> {
+  return created.id;
+}
+
+// ✅ Correct - compound data warrants a type
+export type SearchServiceResult = {
+  items: ItemDto[];
+  totalCount: number;
+};
+\`\`\`
+
+**Simple gets** - No ServiceRequest/ServiceResult. Let the signature be the contract:
+
+\`\`\`typescript
+findById(id: string): Promise<TodoDto | null>
+findByUserId(userId: string): Promise<TodoDto[]>
+\`\`\`
+
+### Action Success/Error Handling
+
+Do NOT use \`useEffect\` to react to \`useActionState\` results. Wrap the action in a \`useCallback\` that handles side effects inline.
+
+\`\`\`typescript
+// ❌ Wrong - useEffect watching action state
+useEffect(() => {
+  if (createState.success) {
+    toast.success("Created");
+    setDialogOpen(false);
+  }
+}, [createState]);
+
+// ✅ Correct - wrapper handles side effects inline
+const handleCreateAction = useCallback(async (prevState: State, formData: FormData) => {
+  const result = await createThing(prevState, formData);
+  if (result.success) {
+    toast.success("Created");
+    setDialogOpen(false);
+  }
+  if (result.error) {
+    toast.error(result.error);
+  }
+  return result;
+}, []);
+
+const [createState, createFormAction, isCreatePending] = useActionState(
+  handleCreateAction,
+  initialState
+);
+\`\`\`
+
+### Error Logging in Actions
+
+Use format \`actions/{filename}/{functionName}:\` for console.error calls:
+
+\`\`\`typescript
+console.error("actions/todo.actions.ts/createTodo:", error);
+\`\`\`
 `;
   }
 
@@ -449,6 +548,78 @@ users.map((u) => u.email)
 items.filter((i) => i.isActive)
 \`\`\`
 
+### Server vs Client Components
+
+Page files (\`page.tsx\`) must be server components - do NOT add \`"use client"\` to pages. Extract interactive parts into separate client component files.
+
+\`\`\`
+app/settings/
+  page.tsx                      # Server component (NO "use client")
+  components/
+    settings-form.tsx           # Client component ("use client")
+app/dashboard/components/       # Shared components for sibling pages
+\`\`\`
+
+### No Module-Scope Mutable State
+
+Do NOT use \`let\` variables at module scope. Modules are cached and state leaks between SSR requests.
+
+\`\`\`typescript
+// ❌ Wrong - module-scope mutable state
+let nextId = 1;
+
+// ✅ Correct - generate inline
+crypto.randomUUID();
+\`\`\`
+
+### User-Friendly Errors
+
+All error messages shown to users must be actionable and understandable. Do NOT expose technical errors. Log technical details to \`console.error()\`, show friendly messages to users.
+
+\`\`\`typescript
+// ❌ Wrong - technical error
+return { error: "User ID is missing from request" };
+
+// ✅ Correct - user-friendly
+return { error: "Something went wrong. Please try again." };
+\`\`\`
+
+### Date Manipulation with Luxon
+
+Use Luxon for all date manipulation. Do NOT manually construct ISO date strings.
+
+\`\`\`typescript
+// ❌ Wrong - manual string construction
+const dateFrom = \`\${year}-\${String(month).padStart(2, "0")}-01\`;
+
+// ✅ Correct - use Luxon
+import { DateTime } from "luxon";
+const startOfMonth = DateTime.local(year, month, 1);
+const dateFrom = startOfMonth.toISODate()!;
+const dateTo = startOfMonth.plus({ months: 1 }).toISODate()!;
+\`\`\`
+
+### Zod Patterns
+
+Use \`z.iso.date()\` for ISO date strings (NOT the deprecated \`z.string().date()\`).
+
+Use \`z.enum(TheEnum)\` for enum validation (NOT \`z.nativeEnum\` or \`Object.values\`).
+
+For JSON array fields in form schemas, use \`z.preprocess\`:
+
+\`\`\`typescript
+// ✅ Correct - preprocess handles JSON, Zod validates the array
+export const MyFormSchema = z.object({
+  items: z.preprocess(
+    (val) => (typeof val === "string" ? JSON.parse(val) : val),
+    ItemSchema.array()
+  ),
+});
+
+// ❌ Wrong - transform with manual error handling
+items: z.string().transform((val, ctx) => { ... ctx.addIssue(...) })
+\`\`\`
+
 ## Utility Functions
 
 Import from \`@/lib/utils\`:
@@ -472,7 +643,7 @@ const debouncedSearch = debounce((query: string) => {
 
 ## Environment Variables
 
-Copy \`.env.example\` to \`.env.local\` and fill in your API keys.
+Copy \`.env.example\` to \`.env\` and fill in your API keys.
 
 **Important:** Import environment variables from \`@/lib/config\`:
 

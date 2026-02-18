@@ -37,7 +37,7 @@ export async function createProject(
 
   onProgress?.('Installing base packages...');
   const { execa } = await import('execa');
-  await execa('npm', ['install', 'zod@^3.24', 'zustand@^5', 'luxon@^3'], { cwd: projectPath });
+  await execa('npm', ['install', 'zod', 'zustand', 'luxon'], { cwd: projectPath });
   await execa('npm', ['install', '-D', '@types/luxon'], { cwd: projectPath });
 
   await fs.mkdir(path.join(projectPath, 'lib/stores'), { recursive: true });

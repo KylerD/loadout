@@ -62,7 +62,7 @@ async function newProjectFlow() {
 
   console.log(chalk.bold('  Next steps:'));
   console.log(chalk.gray(`    1. cd ${config.name}`));
-  console.log(chalk.gray('    2. Configure .env.local with your API keys'));
+  console.log(chalk.gray('    2. Configure .env with your API keys'));
   console.log(chalk.gray('    3. npm run dev'));
   console.log();
 
@@ -127,7 +127,7 @@ async function addIntegrationFlow(projectPath: string) {
   console.log();
 
   console.log(chalk.bold('  Next steps:'));
-  console.log(chalk.gray('    1. Update .env.local with new API keys'));
+  console.log(chalk.gray('    1. Update .env with new API keys'));
   console.log(chalk.gray('    2. npm run dev'));
   console.log();
 
