@@ -3,6 +3,11 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import path from 'path';
+
+const nodeBinDir = path.dirname(process.execPath);
+if (!process.env.PATH?.includes(nodeBinDir)) {
+  process.env.PATH = `${nodeBinDir}:${process.env.PATH || ''}`;
+}
 import { createProject, addIntegrations } from './engine.js';
 import {
   validateProjectConfig,
